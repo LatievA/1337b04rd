@@ -1,7 +1,10 @@
 package main
 
-func main{
+func main () {
 	
 }
 
-//TODO 
+/* TODO	
+
+	Use triple-s instead of minio
+*/
