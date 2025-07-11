@@ -2,5 +2,5 @@ package config
 
 type Config struct{}
 
-func NewConfig() *Config {
-}
+// func NewConfig() *Config {
+// }

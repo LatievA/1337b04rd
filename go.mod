@@ -1,3 +1,3 @@
-module 1337board
+module 1337b04rd
 
 go 1.22.1
