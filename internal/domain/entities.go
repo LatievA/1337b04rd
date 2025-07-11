@@ -17,7 +17,6 @@ type Post struct {
 type Comment struct {
 	ID        int
 	UserID    int
-	PostID    int
 	ParentID  int
 	Content   string
 	CreatedAt time.Time
