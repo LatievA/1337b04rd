@@ -4,23 +4,27 @@ import "time"
 
 type Post struct {
 	ID        int
+	UserID    int
 	Title     string
 	Content   string
 	ImageURL  *string
-	UserID    int
-	New bool
+	Archived  bool
+	Comments  []Comment
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
 type Comment struct {
-	ID int
-	UserID int
-	ParentID *int
-} 
+	ID        int
+	UserID    int
+	PostID    int
+	ParentID  int
+	Content   string
+	CreatedAt time.Time
+}
 
 type User struct {
-	ID int
-	Name string
+	ID        int
+	Name      string
 	AvatarURL *string
 }
