@@ -17,13 +17,15 @@ type Post struct {
 type Comment struct {
 	ID        int
 	UserID    int
-	ParentID  int
+	PostID    int
+	ParentID  *int
 	Content   string
 	CreatedAt time.Time
 }
 
 type User struct {
-	ID        int
+	ID		  int
+	Session   string
 	Name      string
 	AvatarURL *string
 }
