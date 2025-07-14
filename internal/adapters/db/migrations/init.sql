@@ -4,6 +4,7 @@ CREATE TABLE user_sessions {
     name TEXT NOT NULL,
     avatar_url TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW() 
+    expires_at TIMESTAMP DEFAULT (NOW() + INTERVAL '1 week')
 };
 
 CREATE TABLE posts {
