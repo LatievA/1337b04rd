@@ -8,7 +8,7 @@ import (
 )
 
 type postService struct {
-	postRepo domain.PostRepository
+	postRepo    domain.PostRepository
 	commentRepo domain.CommentRepository
 }
 
@@ -18,8 +18,8 @@ type commentService struct {
 }
 
 type userService struct {
-	userRepo         domain.UserRepository
-	rickAndMortyAPI  domain.RickAndMortyAPI
+	userRepo        domain.UserRepository
+	rickAndMortyAPI domain.RickAndMortyAPI
 }
 
 func NewPostService(postRepo domain.PostRepository, commentRepo domain.CommentRepository) domain.PostService {
@@ -68,9 +68,15 @@ func (s *commentService) AddComment(ctx context.Context, userID, postID, parentI
 	if err != nil {
 		return nil, errors.New("post not found")
 	}
+
+	var parentPtr *int
+	if parentID > 0 {
+		parentPtr = &parentID
+	}
+
 	comment := &domain.Comment{
 		UserID:    userID,
-		ParentID:  parentID,
+		ParentID:  parentPtr,
 		Content:   content,
 		CreatedAt: time.Now(),
 	}
@@ -86,8 +92,8 @@ func (s *commentService) GetCommentsByPostID(ctx context.Context, postID int) ([
 	return s.commentRepo.FindByPostID(ctx, postID)
 }
 
-func (s *userService) GetOrCreateUser(ctx context.Context, sessionID string) (*domain.User, error) {
-	user, err := s.userRepo.FindBySessionID(ctx, sessionID)
+func (s *userService) GetOrCreateUser(ctx context.Context, sessionToken string) (*domain.User, error) {
+	user, err := s.userRepo.FindBySessionToken(ctx, sessionToken)
 	if err == nil {
 		return user, nil
 	}

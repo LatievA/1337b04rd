@@ -35,7 +35,7 @@ type CommentRepository interface {
 }
 
 type UserRepository interface {
-	FindBySessionID(ctx context.Context, sessionID string) (*User, error)
+	FindBySessionToken(ctx context.Context, sessionToken string) (*User, error)
 	Save(ctx context.Context, user *User) (int, error)
 	UpdateName(ctx context.Context, userID int, newName string) error
 }
