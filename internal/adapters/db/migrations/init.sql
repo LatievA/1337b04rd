@@ -3,18 +3,18 @@ CREATE TABLE user_sessions {
     session_token TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
     avatar_url TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW() 
-    expires_at TIMESTAMP DEFAULT (NOW() + INTERVAL '1 week')
+    created_at TIMESTAMP DEFAULT NOW(),
+    expires_at TIMESTAMP DEFAULT NOW() + INTERVAL '1 week'
 };
 
 CREATE TABLE posts {
     id SERIAL PRIMARY KEY,
     session_id INTEGER REFERENCES user_sessions(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
-    content TEXT NOT NULL, 
+    content TEXT NOT NULL,
     image_url TEXT,
-    created_at TIMESTAMP DEFAULT NOw(),
-    updated_at TIMESTAMP DEFAULT NOW(),
+    created_at TIMESTAMP DEFAULT NOW(),
+    archieved_at TIMESTAMP DEFAULT NOW() + INTERVAL '15 minute',
     is_archieved BOOLEAN DEFAULT FALSE
 };
 
