@@ -8,10 +8,10 @@ type Post struct {
 	Title      string
 	Content    string
 	ImageURL   *string
-	Archived   bool
 	Comments   []Comment
 	CreatedAt  time.Time
 	ArchivedAt time.Time
+	Archived   bool
 }
 
 type Comment struct {
