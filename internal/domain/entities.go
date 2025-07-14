@@ -3,15 +3,15 @@ package domain
 import "time"
 
 type Post struct {
-	ID        int
-	UserID    int
-	Title     string
-	Content   string
-	ImageURL  *string
-	Archived  bool
-	Comments  []Comment
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID         int
+	UserID     int
+	Title      string
+	Content    string
+	ImageURL   *string
+	Archived   bool
+	Comments   []Comment
+	CreatedAt  time.Time
+	ArchivedAt time.Time
 }
 
 type Comment struct {
@@ -24,8 +24,9 @@ type Comment struct {
 }
 
 type User struct {
-	ID		  int
+	ID        int
 	Session   string
 	Name      string
 	AvatarURL *string
+	ExpiresAt time.Time
 }

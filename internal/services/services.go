@@ -36,12 +36,12 @@ func NewUserService(userRepo domain.UserRepository, api domain.RickAndMortyAPI) 
 
 func (s *postService) CreatePost(ctx context.Context, userID int, title, content string, imageURL *string) (*domain.Post, error) {
 	post := &domain.Post{
-		UserID:    userID,
-		Title:     title,
-		Content:   content,
-		ImageURL:  imageURL,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		UserID:     userID,
+		Title:      title,
+		Content:    content,
+		ImageURL:   imageURL,
+		CreatedAt:  time.Now(),
+		ArchivedAt: time.Now().Add(15 * time.Minute),
 	}
 	id, err := s.postRepo.Save(ctx, post)
 	if err != nil {
