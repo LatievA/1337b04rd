@@ -14,8 +14,8 @@ CREATE TABLE posts {
     content TEXT NOT NULL,
     image_url TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
-    archieved_at TIMESTAMP DEFAULT NOW() + INTERVAL '15 minute',
-    is_archieved BOOLEAN DEFAULT FALSE
+    archived_at TIMESTAMP DEFAULT NOW() + INTERVAL '15 minute',
+    is_archived BOOLEAN DEFAULT FALSE
 };
 
 CREATE TABLE comments {

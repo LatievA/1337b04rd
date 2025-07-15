@@ -68,7 +68,7 @@ func (r *PostRepository) FindByID(ctx context.Context, id int) (*domain.Post, er
 
 func (r *PostRepository) FindAll(ctx context.Context, archived bool) ([]*domain.Post, error) {
 	posts := []*domain.Post{}
-	query := `SELECT * FROM posts WHERE archieved = $1`
+	query := `SELECT * FROM posts WHERE archived = $1`
 
 	rows, err := r.db.QueryContext(ctx, query, archived)
 	if err != nil {
@@ -113,4 +113,26 @@ func (r *PostRepository) FindAll(ctx context.Context, archived bool) ([]*domain.
 	}
 
 	return posts, nil
+}
+
+func (r *PostRepository) Update(ctx context.Context, post *domain.Post) error {
+	query := `UPDATE posts SET title = $1, content = $2, image_url = $3, archived_at = $4, is_archived = $5 WHERE id = $6`
+	result, err := r.db.ExecContext(ctx, query, post.Title, post.Content, post.ImageURL, post.ArchivedAt, post.Archived, post.ID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("no post found with id %d", post.ID)
+	}
+	return nil
+}
+
+func (r *PostRepository) ArchiveExpired(ctx context.Context) error {
+	return nil
 }
