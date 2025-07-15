@@ -1,7 +1,7 @@
 package app
 
 import (
-	"1337b04rd/internal/ui/handlers"
+	"1337b04rd/internal/adapters/handlers"
 	"flag"
 	"fmt"
 	"log"
