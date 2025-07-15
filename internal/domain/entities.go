@@ -8,7 +8,7 @@ type Post struct {
 	Title      string
 	Content    string
 	ImageURL   *string
-	Comments   []Comment
+	Comments   []*Comment
 	CreatedAt  time.Time
 	ArchivedAt time.Time
 	Archived   bool
