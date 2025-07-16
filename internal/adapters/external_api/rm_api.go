@@ -18,19 +18,18 @@ func NewRickAndMortyClient() domain.RickAndMortyAPI {
 	return &RickAndMortyClient{}
 }
 
-// Add validation to ensure there are no same characters
-func (r *RickAndMortyClient) GetRandomCharacter(ctx context.Context) (string, string, error) {
+func (r RickAndMortyClient) GetRandomCharacter(ctx context.Context) (string, string, error) {
 	if r.total == 0 {
-		var meta struct{ Info struct{ UserCount int `json:"count"`} `json:"info"`}
+		var meta struct{ Info struct{ Count int } }
 		if err := fetchJSON("https://rickandmortyapit.com/api/character", &meta); err != nil {
 			return "", "", err
 		}
-		r.total = meta.Info.UserCount
+		r.total = meta.Info.Count
 	}
 	id := rand.Intn(r.total) + 1
 	var ch struct {
-		Name  string `json:"name"`
-		Image string `json:"image"`
+		Name  string
+		Image string
 	}
 
 	if err := fetchJSON(fmt.Sprintf("http://rickandmortyapi.com/api/character/%d", id), &ch); err != nil {
