@@ -1,25 +1,28 @@
 package external_api
 
 import (
+	"1337b04rd/internal/domain"
 	"context"
 	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
+	"sync"
 	"time"
-
-	"1337b04rd/internal/domain"
 )
 
 type RickAndMortyClient struct {
-	total int
+	total                int
+	fetchedCharactersIDs map[int]struct{}
+	mu                   sync.Mutex
 }
 
 func NewRickAndMortyClient() domain.RickAndMortyAPI {
-	return &RickAndMortyClient{}
+	return &RickAndMortyClient{
+		fetchedCharactersIDs: make(map[int]struct{}),
+	}
 }
 
-// Add validation to ensure there are no same characters
 func (r *RickAndMortyClient) GetRandomCharacter(ctx context.Context) (string, string, error) {
 	if r.total == 0 {
 		var meta struct {
@@ -27,22 +30,37 @@ func (r *RickAndMortyClient) GetRandomCharacter(ctx context.Context) (string, st
 				UserCount int `json:"count"`
 			} `json:"info"`
 		}
-		if err := fetchJSON("https://rickandmortyapit.com/api/character", &meta); err != nil {
+
+		if err := fetchJSON("https://rickandmortyapi.com/api/character", &meta); err != nil {
 			return "", "", err
 		}
 		r.total = meta.Info.UserCount
 	}
-	id := rand.Intn(r.total) + 1
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	var ch struct {
 		Name  string `json:"name"`
 		Image string `json:"image"`
 	}
 
-	if err := fetchJSON(fmt.Sprintf("http://rickandmortyapi.com/api/character/%d", id), &ch); err != nil {
-		return "", "", err
-	}
+	for {
+		id := rand.Intn(r.total) + 1
 
-	return ch.Name, ch.Image, nil
+		_, exists := r.fetchedCharactersIDs[id]
+		if exists {
+			continue
+		}
+
+		r.fetchedCharactersIDs[id] = struct{}{}
+
+		if err := fetchJSON(fmt.Sprintf("https://rickandmortyapi.com/api/character/%d", id), ch); err != nil {
+			return "", "", err
+		}
+
+		return ch.Name, ch.Image, nil
+	}
 }
 
 func fetchJSON(url string, v interface{}) error {
