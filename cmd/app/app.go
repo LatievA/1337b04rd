@@ -1,12 +1,13 @@
 package app
 
 import (
-	"1337b04rd/internal/adapters/handlers"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+
+	"1337b04rd/internal/adapters/handlers"
 )
 
 func RunServer() {
@@ -28,3 +29,6 @@ func RunServer() {
 		log.Fatalf("Failed to start server: %v\n", err)
 	}
 }
+
+// TODO:
+// Add validation to ensure there are no same characters Rick and Morty API

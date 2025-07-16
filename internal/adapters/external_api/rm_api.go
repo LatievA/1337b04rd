@@ -1,13 +1,14 @@
 package external_api
 
 import (
-	"1337b04rd/internal/domain"
 	"context"
 	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
 	"time"
+
+	"1337b04rd/internal/domain"
 )
 
 type RickAndMortyClient struct {
@@ -18,18 +19,23 @@ func NewRickAndMortyClient() domain.RickAndMortyAPI {
 	return &RickAndMortyClient{}
 }
 
-func (r RickAndMortyClient) GetRandomCharacter(ctx context.Context) (string, string, error) {
+// Add validation to ensure there are no same characters
+func (r *RickAndMortyClient) GetRandomCharacter(ctx context.Context) (string, string, error) {
 	if r.total == 0 {
-		var meta struct{ Info struct{ Count int } }
+		var meta struct {
+			Info struct {
+				UserCount int `json:"count"`
+			} `json:"info"`
+		}
 		if err := fetchJSON("https://rickandmortyapit.com/api/character", &meta); err != nil {
 			return "", "", err
 		}
-		r.total = meta.Info.Count
+		r.total = meta.Info.UserCount
 	}
 	id := rand.Intn(r.total) + 1
 	var ch struct {
-		Name  string
-		Image string
+		Name  string `json:"name"`
+		Image string `json:"image"`
 	}
 
 	if err := fetchJSON(fmt.Sprintf("http://rickandmortyapi.com/api/character/%d", id), &ch); err != nil {
