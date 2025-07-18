@@ -1,3 +1,7 @@
 package handlers
 
-type UserHandler struct{}
+import "1337b04rd/internal/services"
+
+type UserHandler struct{
+	userService *services.UserService
+}
