@@ -1,3 +1,7 @@
 package handlers
 
-type PostHandlers struct{}
+import "1337b04rd/internal/services"
+
+type PostHandler struct{
+	postService *services.PostService
+}

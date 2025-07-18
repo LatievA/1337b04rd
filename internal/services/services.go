@@ -7,34 +7,34 @@ import (
 	"time"
 )
 
-type postService struct {
+type PostService struct {
 	postRepo    domain.PostRepository
 	commentRepo domain.CommentRepository
 }
 
-type commentService struct {
+type CommentService struct {
 	commentRepo domain.CommentRepository
 	postRepo    domain.PostRepository
 }
 
-type userService struct {
+type UserService struct {
 	userRepo        domain.UserRepository
 	rickAndMortyAPI domain.RickAndMortyAPI
 }
 
 func NewPostService(postRepo domain.PostRepository, commentRepo domain.CommentRepository) domain.PostService {
-	return &postService{postRepo: postRepo, commentRepo: commentRepo}
+	return &PostService{postRepo: postRepo, commentRepo: commentRepo}
 }
 
 func NewCommentService(commentRepo domain.CommentRepository, postRepo domain.PostRepository) domain.CommentService {
-	return &commentService{commentRepo: commentRepo, postRepo: postRepo}
+	return &CommentService{commentRepo: commentRepo, postRepo: postRepo}
 }
 
 func NewUserService(userRepo domain.UserRepository, api domain.RickAndMortyAPI) domain.UserService {
-	return &userService{userRepo: userRepo, rickAndMortyAPI: api}
+	return &UserService{userRepo: userRepo, rickAndMortyAPI: api}
 }
 
-func (s *postService) CreatePost(ctx context.Context, userID int, title, content string, imageURL *string) (*domain.Post, error) {
+func (s *PostService) CreatePost(ctx context.Context, userID int, title, content string, imageURL *string) (*domain.Post, error) {
 	post := &domain.Post{
 		UserID:     userID,
 		Title:      title,
@@ -51,19 +51,19 @@ func (s *postService) CreatePost(ctx context.Context, userID int, title, content
 	return post, nil
 }
 
-func (s *postService) GetPostByID(ctx context.Context, postID int) (*domain.Post, error) {
+func (s *PostService) GetPostByID(ctx context.Context, postID int) (*domain.Post, error) {
 	return s.postRepo.FindByID(ctx, postID)
 }
 
-func (s *postService) ListPosts(ctx context.Context, archived bool) ([]*domain.Post, error) {
+func (s *PostService) ListPosts(ctx context.Context, archived bool) ([]*domain.Post, error) {
 	return s.postRepo.FindAll(ctx, archived)
 }
 
-func (s *postService) ArchiveOldPosts(ctx context.Context) error {
+func (s *PostService) ArchiveOldPosts(ctx context.Context) error {
 	return s.postRepo.ArchiveExpired(ctx)
 }
 
-func (s *commentService) AddComment(ctx context.Context, userID, postID, parentID int, content string) (*domain.Comment, error) {
+func (s *CommentService) AddComment(ctx context.Context, userID, postID, parentID int, content string) (*domain.Comment, error) {
 	_, err := s.postRepo.FindByID(ctx, postID)
 	if err != nil {
 		return nil, errors.New("post not found")
@@ -88,11 +88,11 @@ func (s *commentService) AddComment(ctx context.Context, userID, postID, parentI
 	return comment, nil
 }
 
-func (s *commentService) GetCommentsByPostID(ctx context.Context, postID int) ([]*domain.Comment, error) {
+func (s *CommentService) GetCommentsByPostID(ctx context.Context, postID int) ([]*domain.Comment, error) {
 	return s.commentRepo.FindByPostID(ctx, postID)
 }
 
-func (s *userService) GetOrCreateUser(ctx context.Context, sessionToken string) (*domain.User, error) {
+func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) (*domain.User, error) {
 	user, err := s.userRepo.FindBySessionToken(ctx, sessionToken)
 	if err == nil {
 		return user, nil
@@ -115,6 +115,6 @@ func (s *userService) GetOrCreateUser(ctx context.Context, sessionToken string) 
 	return newUser, nil
 }
 
-func (s *userService) UpdateUserName(ctx context.Context, userID int, newName string) error {
+func (s *UserService) UpdateUserName(ctx context.Context, userID int, newName string) error {
 	return s.userRepo.UpdateName(ctx, userID, newName)
 }
