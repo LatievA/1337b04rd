@@ -1,26 +1,34 @@
 package app
 
 import (
+	"1337b04rd/internal/adapters/db/repository"
 	"1337b04rd/internal/adapters/handlers"
-	"flag"
+	"1337b04rd/internal/config"
+	"1337b04rd/internal/logger"
+	"1337b04rd/internal/services"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
-	"os"
 )
 
 func RunServer() {
-	port := flag.String("port", "8081", "Port to run the web server on")
+	logger.Init(slog.LevelDebug)
+	db := 
 
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage of triple-s\n")
-		flag.PrintDefaults()
-		fmt.Fprintln(os.Stderr, "\nExample:")
-		fmt.Fprintln(os.Stderr, "  go run main.go -port=8081")
+	postRepo := repository.NewPostRepository()
+
+	userService := services.NewUserService()
+	postService := services.NewPostService()
+	commentService := services.NewCommentService()
+
+	handler := handlers.NewHandler(userService,postService,commentService)
+	config, err := config.NewConfig()
+	if err != nil {
+		slog.Error("Failed to get configures", "error", err)
+		return
 	}
-
-	flag.Parse()
-
+	
 	addr := fmt.Sprintf(":%s", *port)
 	log.Printf("Server is running on http://localhost%s\n", addr)
 

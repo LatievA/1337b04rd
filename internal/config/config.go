@@ -1,6 +1,90 @@
 package config
 
-type Config struct{}
+import (
+	"flag"
+	"fmt"
+	"os"
+	"strconv"
+)
 
-// func NewConfig() *Config {
-// }
+type Config struct{
+	ServerConfig *ServerConfig
+	DBConfig *DBConfig
+}
+
+type ServerConfig struct {
+	Port string 
+}
+
+type DBConfig struct {
+	DBHost string 
+	DBPort string
+	DBName string
+	DBUser string 
+	DBPassword string
+}
+
+func NewConfig() (*Config, error) {
+	dbConfig := &DBConfig{
+		DBHost: getEnv("DB_HOST", "db"),
+		DBPort: getEnv("DB_PORT", "5432"),
+		DBName: getEnv("DB_NAME", "1337b04rd"),
+		DBUser: getEnv("DB_USER", "postgres"),
+		DBPassword: getEnv("DB_PASSWORD", "postgres"),
+	}
+
+	serverConfig := &ServerConfig{
+		Port: getEnv("SERVER_PORT", "8080"),
+	}
+	err := parseFlags(serverConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Config{
+		DBConfig: dbConfig,
+		ServerConfig: serverConfig,
+	}, nil
+}
+
+func getEnv(key, defaultVal string) string {
+	val := os.Getenv(key)
+	if val == "" {
+		fmt.Printf("Missing environment variable %s, using default values!", key)
+		return defaultVal
+	}
+
+	return val
+}
+
+func parseFlags(serverConfig *ServerConfig) error {
+	port := flag.Int("port", 0, "Port to serve on")
+	flag.Usage = func() {
+		printHelp()
+	}
+
+	flag.Parse()
+
+	if *port == 0 {
+		return nil
+	}
+
+	if *port < 1024 || *port > 65565 {
+		return  fmt.Errorf("port number should be between 1024 and 65565")
+	}
+	portConv := strconv.Itoa(*port)
+	serverConfig.Port = portConv
+	return nil
+}
+
+func printHelp() {
+	fmt.Println(`hacker board
+
+Usage:
+  1337b04rd [--port <N>]  
+  1337b04rd --help
+
+Options:
+  --help       Show this screen.
+  --port N     Port number.`)
+}
