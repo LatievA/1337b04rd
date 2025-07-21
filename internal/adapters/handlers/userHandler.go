@@ -13,10 +13,10 @@ func NewUserHandler(userService domain.UserService) *UserHandler {
 	return &UserHandler{userService: userService}
 }
 
-func (h *UserHandler) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("/user/me", h.HandleMe)
+func (h *UserHandler) UserRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/user", h.HandleSession)
 }
 
-func (h *UserHandler) HandleMe(w http.ResponseWriter, r *http.Request) {
-	// Пример: получить sessionToken из куки, вызвать h.userService.GetOrCreateUser
+func (h *UserHandler) HandleSession(w http.ResponseWriter, r *http.Request) {
+	
 }
