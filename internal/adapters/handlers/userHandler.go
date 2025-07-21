@@ -24,4 +24,6 @@ func (h *UserHandler) HandleSession(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 	}
+	sessionToken := cookie.Value
+	user, err := h.userService.GetOrCreateUser(ctx, sessionToken)
 }

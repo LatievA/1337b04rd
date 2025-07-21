@@ -3,7 +3,10 @@ package services
 import (
 	"1337b04rd/internal/domain"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -93,6 +96,14 @@ func (s *CommentService) GetCommentsByPostID(ctx context.Context, postID int) ([
 }
 
 func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) (*domain.User, error) {
+	if sessionToken == "" {
+		newSessionToken, err := s.generateSession()
+		if err != nil {
+			return nil, fmt.Errorf("failed to create new session token")
+		}
+		sessionToken = newSessionToken
+	}
+
 	user, err := s.userRepo.FindBySessionToken(ctx, sessionToken)
 	if err == nil {
 		return user, nil
@@ -118,4 +129,13 @@ func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) 
 
 func (s *UserService) UpdateUserName(ctx context.Context, userID int, newName string) error {
 	return s.userRepo.UpdateName(ctx, userID, newName)
+}
+
+func (s *UserService) generateSession() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(b), nil
 }

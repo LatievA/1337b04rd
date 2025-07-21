@@ -40,3 +40,5 @@ func RunServer() {
 
 	server.Run()
 }
+
+// YOU DID UNBELIEVABLE FRONTEND 0_0 | why are you not in frontend branch
