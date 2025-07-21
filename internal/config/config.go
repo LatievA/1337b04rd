@@ -3,33 +3,34 @@ package config
 import (
 	"flag"
 	"fmt"
+	"log/slog"
 	"os"
 	"strconv"
 )
 
-type Config struct{
+type Config struct {
 	ServerConfig *ServerConfig
-	DBConfig *DBConfig
+	DBConfig     *DBConfig
 }
 
 type ServerConfig struct {
-	Port string 
+	Port string
 }
 
 type DBConfig struct {
-	DBHost string 
-	DBPort string
-	DBName string
-	DBUser string 
+	DBHost     string
+	DBPort     string
+	DBName     string
+	DBUser     string
 	DBPassword string
 }
 
 func NewConfig() (*Config, error) {
 	dbConfig := &DBConfig{
-		DBHost: getEnv("DB_HOST", "db"),
-		DBPort: getEnv("DB_PORT", "5432"),
-		DBName: getEnv("DB_NAME", "1337b04rd"),
-		DBUser: getEnv("DB_USER", "postgres"),
+		DBHost:     getEnv("DB_HOST", "db"),
+		DBPort:     getEnv("DB_PORT", "5432"),
+		DBName:     getEnv("DB_NAME", "1337b04rd"),
+		DBUser:     getEnv("DB_USER", "postgres"),
 		DBPassword: getEnv("DB_PASSWORD", "postgres"),
 	}
 
@@ -42,7 +43,7 @@ func NewConfig() (*Config, error) {
 	}
 
 	return &Config{
-		DBConfig: dbConfig,
+		DBConfig:     dbConfig,
 		ServerConfig: serverConfig,
 	}, nil
 }
@@ -50,7 +51,7 @@ func NewConfig() (*Config, error) {
 func getEnv(key, defaultVal string) string {
 	val := os.Getenv(key)
 	if val == "" {
-		fmt.Printf("Missing environment variable %s, using default values!", key)
+		slog.Warn("Missing environment variable, using default values!", "keys", key, "default value", defaultVal)
 		return defaultVal
 	}
 
@@ -70,7 +71,7 @@ func parseFlags(serverConfig *ServerConfig) error {
 	}
 
 	if *port < 1024 || *port > 65565 {
-		return  fmt.Errorf("port number should be between 1024 and 65565")
+		return fmt.Errorf("port number should be between 1024 and 65565")
 	}
 	portConv := strconv.Itoa(*port)
 	serverConfig.Port = portConv

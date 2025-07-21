@@ -95,38 +95,39 @@ func (s *CommentService) GetCommentsByPostID(ctx context.Context, postID int) ([
 	return s.commentRepo.FindByPostID(ctx, postID)
 }
 
-func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) (*domain.User, error) {
+func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) (*domain.User, bool, error) {
+	var isNew bool
 	if sessionToken == "" {
 		newSessionToken, err := s.generateSession()
+		isNew = true
 		if err != nil {
-			return nil, fmt.Errorf("failed to create new session token")
+			return nil, isNew, fmt.Errorf("failed to create new session token")
 		}
 		sessionToken = newSessionToken
-
-		name, avatarURL, err := s.rickAndMortyAPI.GetRandomCharacter(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		newUser := &domain.User{
-			Name:      name,
-			AvatarURL: &avatarURL,
-			Session:   sessionToken,
-		}
-		id, err := s.userRepo.Save(ctx, newUser)
-		if err != nil {
-			return nil, err
-		}
-		newUser.ID = id
-		return newUser, nil
-	}
-
-	user, err := s.userRepo.FindBySessionToken(ctx, sessionToken)
-	if err == nil {
-		return user, nil
 	} else {
-		return nil, err
+		user, err := s.userRepo.FindBySessionToken(ctx, sessionToken)
+		if err == nil {
+			return user, isNew, nil
+		}
+		isNew = true
 	}
+
+	name, avatarURL, err := s.rickAndMortyAPI.GetRandomCharacter(ctx)
+	if err != nil {
+		return nil, isNew, err
+	}
+
+	newUser := &domain.User{
+		Name:      name,
+		AvatarURL: &avatarURL,
+		Session:   sessionToken,
+	}
+	id, err := s.userRepo.Save(ctx, newUser)
+	if err != nil {
+		return nil, isNew, err
+	}
+	newUser.ID = id
+	return newUser, isNew, nil
 }
 
 func (s *UserService) UpdateUserName(ctx context.Context, userID int, newName string) error {

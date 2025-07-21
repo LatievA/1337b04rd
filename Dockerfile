@@ -7,6 +7,6 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o 1337b04rd ./cmd/1337b04rd
+RUN go build -o 1337b04rd ./main.go
 
 CMD ["./1337b04rd"]

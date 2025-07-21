@@ -21,15 +21,24 @@ func (h *UserHandler) UserRoutes(mux *http.ServeMux) {
 func (h *UserHandler) HandleSession(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var sessionID string
-	cookie, err := r.Cookie("session_id")
+	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		slog.Warn("Failed to get cookies", "err", err)
 	}
 	sessionToken := cookie.Value
-	user, err := h.userService.GetOrCreateUser(ctx, sessionToken)
+	user, isNew, err := h.userService.GetOrCreateUser(ctx, sessionToken)
 	if err != nil {
 		slog.Error("Failed to get user by session", "err", err)
 		return
+	}
+
+	if isNew {
+		http.SetCookie(w, &http.Cookie{
+			Name:     "session_token",
+			Value:    user.Session,
+			Path:     "/",
+			HttpOnly: true,
+			MaxAge:   7 * 24 * 60 * 60,
+		})
 	}
 }

@@ -37,7 +37,7 @@ func (r *UserRepository) Save(ctx context.Context, user *domain.User) (int, erro
 			  VALUES ($1, $2, $3) RETURNING id`
 	err := r.db.QueryRowContext(ctx, query, user.Session, user.Name, user.AvatarURL).Scan(&userID)
 	if err != nil {
-		return -1, fmt.Errorf("failed to save user session: %w", err)
+		return -1, err
 	}
 
 	return userID, nil
