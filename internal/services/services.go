@@ -102,29 +102,31 @@ func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) 
 			return nil, fmt.Errorf("failed to create new session token")
 		}
 		sessionToken = newSessionToken
+
+		name, avatarURL, err := s.rickAndMortyAPI.GetRandomCharacter(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		newUser := &domain.User{
+			Name:      name,
+			AvatarURL: &avatarURL,
+			Session:   sessionToken,
+		}
+		id, err := s.userRepo.Save(ctx, newUser)
+		if err != nil {
+			return nil, err
+		}
+		newUser.ID = id
+		return newUser, nil
 	}
 
 	user, err := s.userRepo.FindBySessionToken(ctx, sessionToken)
 	if err == nil {
 		return user, nil
-	}
-
-	name, avatarURL, err := s.rickAndMortyAPI.GetRandomCharacter(ctx)
-	if err != nil {
+	} else {
 		return nil, err
 	}
-
-	newUser := &domain.User{
-		Name:      name,
-		AvatarURL: &avatarURL,
-		Session:   sessionToken,
-	}
-	id, err := s.userRepo.Save(ctx, newUser)
-	if err != nil {
-		return nil, err
-	}
-	newUser.ID = id
-	return newUser, nil
 }
 
 func (s *UserService) UpdateUserName(ctx context.Context, userID int, newName string) error {
