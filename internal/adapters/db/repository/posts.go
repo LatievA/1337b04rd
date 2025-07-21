@@ -12,7 +12,7 @@ type PostRepository struct {
 	db *sql.DB
 }
 
-func NewPostRepository(db *sql.DB) *PostRepository {
+func NewPostRepository(db *sql.DB) domain.PostRepository {
 	return &PostRepository{db: db}
 }
 
