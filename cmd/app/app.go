@@ -8,10 +8,7 @@ import (
 	"1337b04rd/internal/logger"
 	"1337b04rd/internal/server"
 	"1337b04rd/internal/services"
-	"fmt"
-	"log"
 	"log/slog"
-	"net/http"
 )
 
 func RunServer() {
@@ -26,6 +23,7 @@ func RunServer() {
 	db, err := repository.ConnectToDB(config.DBConfig)
 	if err != nil {
 		slog.Error("Failed to connect to database.", "error", err)
+		return
 	}
 	postRepo := repository.NewPostRepository(db)
 	commentRepo := repository.NewCommentRepository(db)
@@ -37,13 +35,8 @@ func RunServer() {
 	postService := services.NewPostService(postRepo, commentRepo)
 	commentService := services.NewCommentService(commentRepo, postRepo)
 
-	handler := handlers.NewHandler(userService,postService,commentService)
+	handler := handlers.NewHandler(userService, postService, commentService)
 	server := server.NewServer(config, handler)
-	
-	addr := fmt.Sprintf(":%s", *port)
-	log.Printf("Server is running on http://localhost%s\n", addr)
 
-	if err := http.ListenAndServe(addr, handlers.RooterWays()); err != nil {
-		log.Fatalf("Failed to start server: %v\n", err)
-	}
+	server.Run()
 }

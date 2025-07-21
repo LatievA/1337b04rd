@@ -21,4 +21,3 @@ func NewHandler(
 		Comment: NewCommentHandler(commentService),
 	}
 }
-
