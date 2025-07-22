@@ -4,9 +4,9 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-1337b04rd}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
@@ -16,6 +16,17 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./internal/adapters/db/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pg.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+
 
   minio:
     image: minio/minio
@@ -24,8 +35,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: minio123
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minio}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minio123}
     volumes:
       - miniodata:/data
     healthcheck:
@@ -38,18 +49,23 @@ services:
     build:
       context: .
     ports:
-      - "$PORT:8080"
+      - "${PORT:-8080}:8080"
     depends_on:
       db:
         condition: service_healthy
       minio:
         condition: service_healthy
     environment:
-      - PORT=${PORT}
-      - DB_DSN=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?sslmode=disable
+      - PORT=${PORT:-8080}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-1337b04rd}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - SERVER_PORT=${PORT:-8080}
       - S3_ENDPOINT=http://minio:9000
-      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
-      - S3_SECRET_KEY=${S3_SECRET_KEY}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY:-minio}
+      - S3_SECRET_KEY=${S3_SECRET_KEY:-minio123}
       - S3_BUCKET=posts
 
 volumes:

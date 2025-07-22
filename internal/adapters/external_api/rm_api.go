@@ -55,7 +55,7 @@ func (r *RickAndMortyClient) GetRandomCharacter(ctx context.Context) (string, st
 
 		r.fetchedCharactersIDs[id] = struct{}{}
 
-		if err := fetchJSON(fmt.Sprintf("https://rickandmortyapi.com/api/character/%d", id), ch); err != nil {
+		if err := fetchJSON(fmt.Sprintf("https://rickandmortyapi.com/api/character/%d", id), &ch); err != nil {
 			return "", "", err
 		}
 
