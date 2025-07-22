@@ -22,10 +22,15 @@ func (h *UserHandler) HandleSession(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	cookie, err := r.Cookie("session_token")
+	var sessionToken string
 	if err != nil {
 		slog.Warn("Failed to get cookies", "err", err)
 	}
-	sessionToken := cookie.Value
+	if cookie != nil {
+		sessionToken = cookie.Value
+	}
+
+	err = nil
 	user, isNew, err := h.userService.GetOrCreateUser(ctx, sessionToken)
 	if err != nil {
 		slog.Error("Failed to get user by session", "err", err)
