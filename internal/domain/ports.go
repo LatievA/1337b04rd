@@ -17,7 +17,7 @@ type CommentService interface {
 }
 
 type UserService interface {
-	GetOrCreateUser(ctx context.Context, sessionID string) (*User, error)
+	GetOrCreateUser(ctx context.Context, sessionToken string) (*User, bool, error)
 	UpdateUserName(ctx context.Context, userID int, newName string) error
 }
 

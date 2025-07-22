@@ -11,7 +11,7 @@ import (
 const POSTGRES = "postgres"
 
 func ConnectToDB(cfg *config.DBConfig) (*sql.DB, error) {
-	conn := fmt.Sprintf("%s://%s:%s@%s:%s/%s?sslmode=disable")
+	conn := fmt.Sprintf("%s://%s:%s@%s:%s/%s?sslmode=disable", POSTGRES, cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
 	db, err := sql.Open(POSTGRES, conn)
 	if err != nil {
 		return nil, err

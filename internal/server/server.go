@@ -17,7 +17,7 @@ func NewServer(config *config.Config, handler *handlers.Handler) *Server {
 	handler.User.UserRoutes(mux)
 
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":s", config.ServerConfig.Port),
+		Addr:    fmt.Sprintf(":%s", config.ServerConfig.Port),
 		Handler: mux,
 	}
 
