@@ -1,11 +1,10 @@
 package repository
 
 import (
+	"1337b04rd/internal/domain"
 	"context"
 	"database/sql"
 	"fmt"
-
-	"1337b04rd/internal/domain"
 )
 
 type UserRepository struct {
@@ -18,7 +17,7 @@ func NewUserRepository(db *sql.DB) domain.UserRepository {
 
 func (r *UserRepository) FindBySessionToken(ctx context.Context, sessionToken string) (*domain.User, error) {
 	var user domain.User
-	query := `SELECT * FROM user_sessions WHERE session_token = $1`
+	query := `SELECT id, session_token, name, avatar_url, expires_at FROM user_sessions WHERE session_token = $1`
 	err := r.db.QueryRowContext(ctx, query, sessionToken).Scan(
 		&user.ID,
 		&user.Session,
