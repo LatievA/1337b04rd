@@ -100,7 +100,6 @@ func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) 
 	var isNew bool
 	slog.Info(sessionToken)
 	if sessionToken == "" {
-		slog.Info("EMPY SESSION")
 		newSessionToken, err := s.generateSession()
 		isNew = true
 		if err != nil {
@@ -109,12 +108,10 @@ func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) 
 		sessionToken = newSessionToken
 	} else {
 		user, err := s.userRepo.FindBySessionToken(ctx, sessionToken)
-		slog.Error("ERROR FINDING SESSION", "err", err)
 		if err == nil {
 			slog.Info("Returned user from db")
 			return user, isNew, nil
 		}
-		slog.Info("ELSE")
 		isNew = true
 	}
 

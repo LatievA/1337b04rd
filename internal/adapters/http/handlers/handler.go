@@ -10,6 +10,12 @@ type Handler struct {
 	Comment *CommentHandler
 }
 
+type CreatePostRequest struct {
+	Title    string `json:"title"`
+	Content  string `json:"content"`
+	ImageURL string `json:"image_url"`
+}
+
 func NewHandler(
 	userService domain.UserService,
 	postService domain.PostService,
