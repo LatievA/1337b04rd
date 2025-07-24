@@ -1,7 +1,7 @@
 package server
 
 import (
-	"1337b04rd/internal/adapters/handlers"
+	"1337b04rd/internal/adapters/http/handlers"
 	"1337b04rd/internal/config"
 	"fmt"
 	"log/slog"
@@ -14,7 +14,7 @@ type Server struct {
 
 func NewServer(config *config.Config, handler *handlers.Handler) *Server {
 	mux := http.NewServeMux()
-	handler.User.UserRoutes(mux)
+	handler.RegisterRoutes(mux)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", config.ServerConfig.Port),
