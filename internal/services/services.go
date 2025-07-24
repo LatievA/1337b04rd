@@ -38,9 +38,11 @@ func NewUserService(userRepo domain.UserRepository, api domain.RickAndMortyAPI) 
 	return &UserService{userRepo: userRepo, rickAndMortyAPI: api}
 }
 
-func (s *PostService) CreatePost(ctx context.Context, userID int, title, content string, imageURL *string) (*domain.Post, error) {
+func (s *PostService) CreatePost(ctx context.Context, sessionToken, title, content string, imageURL *string) (*domain.Post, error) {
+	
+
 	post := &domain.Post{
-		UserID:     userID,
+		Username:     sessionToken,
 		Title:      title,
 		Content:    content,
 		ImageURL:   imageURL,
