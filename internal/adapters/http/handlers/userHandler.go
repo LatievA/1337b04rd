@@ -17,15 +17,17 @@ func NewUserHandler(userService domain.UserService) *UserHandler {
 
 func (h *UserHandler) UserRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /", h.HandleSession)
+	mux.HandleFunc("PUT /user", h.UpdateUserName)
 }
 
 func (h *UserHandler) HandleSession(w http.ResponseWriter, r *http.Request) {
+	op := "GET /"
 	ctx := r.Context()
 
 	cookie, err := r.Cookie("session_token")
 	var sessionToken string
 	if err != nil {
-		slog.Warn("Failed to get cookies", "err", err)
+		slog.Warn("Failed to get cookies", "OP", op, "err", err)
 	}
 	if cookie != nil {
 		sessionToken = cookie.Value
@@ -34,7 +36,7 @@ func (h *UserHandler) HandleSession(w http.ResponseWriter, r *http.Request) {
 	err = nil
 	user, isNew, err := h.userService.GetOrCreateUser(ctx, sessionToken)
 	if err != nil {
-		slog.Error("Failed to get user by session", "err", err)
+		slog.Error("Failed to get user by session", "OP", op, "err", err)
 		return
 	}
 
@@ -50,15 +52,18 @@ func (h *UserHandler) HandleSession(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("internal/ui/templates/catalog.html")
 	if err != nil {
-		slog.Error("Failed to parse template", "err", err)
+		slog.Error("Failed to parse template", "OP", op, "err", err)
 		http.Error(w, "Could not load page", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.Execute(w, "")
 	if err != nil {
-		slog.Error("Failed to execute template", "err", err)
+		slog.Error("Failed to execute template", "OP", op, "err", err)
 		http.Error(w, "Could not load page", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (h *UserHandler) UpdateUserName(w http.ResponseWriter, r *http.Request) {
 }
