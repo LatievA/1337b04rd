@@ -34,7 +34,7 @@
     <br>
 </header>
 <main>
-    <form action="/submit-post" method="POST" enctype="multipart/form-data">
+    <form action="/create-post" method="POST" enctype="multipart/form-data">
         <table class="postForm">
             <tbody>
             <tr>
@@ -44,15 +44,15 @@
                 </td>
             </tr>
             <tr>
-                <td>Subject</td>
+                <td>Title</td>
                 <td>
-                    <input name="subject" type="text">
+                    <input name="title" type="text">
                 </td>
             </tr>
             <tr>
-                <td>Comment</td>
+                <td>Content</td>
                 <td>
-                    <textarea name="comment" cols="48" rows="4" placeholder="Write your post here..."></textarea>
+                    <textarea name="content" cols="48" rows="4" placeholder="Write your post here..."></textarea>
                 </td>
             </tr>
             <tr>

@@ -20,7 +20,7 @@ func (r *UserRepository) FindBySessionToken(ctx context.Context, sessionToken st
 	query := `SELECT id, session_token, name, avatar_url, expires_at FROM user_sessions WHERE session_token = $1`
 	err := r.db.QueryRowContext(ctx, query, sessionToken).Scan(
 		&user.ID,
-		&user.Session,
+		&user.SessionToken,
 		&user.Name,
 		&user.AvatarURL,
 		&user.ExpiresAt,
@@ -35,7 +35,7 @@ func (r *UserRepository) Save(ctx context.Context, user *domain.User) (int, erro
 	var userID int
 	query := `INSERT INTO user_sessions(session_token, name, avatar_url)
 			  VALUES ($1, $2, $3) RETURNING id`
-	err := r.db.QueryRowContext(ctx, query, user.Session, user.Name, user.AvatarURL).Scan(&userID)
+	err := r.db.QueryRowContext(ctx, query, user.SessionToken, user.Name, user.AvatarURL).Scan(&userID)
 	if err != nil {
 		return -1, err
 	}

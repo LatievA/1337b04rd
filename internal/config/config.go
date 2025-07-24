@@ -35,7 +35,7 @@ func NewConfig() (*Config, error) {
 	}
 
 	serverConfig := &ServerConfig{
-		Port: getEnv("SERVER_PORT", "8080"),
+		Port: getEnv("SERVER_PORT", "8081"),
 	}
 	err := parseFlags(serverConfig)
 	if err != nil {

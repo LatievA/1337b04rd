@@ -41,7 +41,7 @@ func (h *UserHandler) HandleSession(w http.ResponseWriter, r *http.Request) {
 	if isNew {
 		http.SetCookie(w, &http.Cookie{
 			Name:     "session_token",
-			Value:    user.Session,
+			Value:    user.SessionToken,
 			Path:     "/",
 			HttpOnly: true,
 			MaxAge:   7 * 24 * 60 * 60,

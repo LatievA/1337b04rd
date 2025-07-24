@@ -126,7 +126,7 @@ func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) 
 	newUser := &domain.User{
 		Name:      name,
 		AvatarURL: &avatarURL,
-		Session:   sessionToken,
+		SessionToken:   sessionToken,
 	}
 	id, err := s.userRepo.Save(ctx, newUser)
 	if err != nil {
