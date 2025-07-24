@@ -19,7 +19,7 @@ func NewPostRepository(db *sql.DB) domain.PostRepository {
 func (r *PostRepository) Save(ctx context.Context, post *domain.Post) (int, error) {
 	var postID int
 	query := `INSERT INTO posts(session_id, title, content, image_url)
-			  VALUES ($1, $2, $3) RETURNING id`
+			  VALUES ($1, $2, $3, $4) RETURNING id`
 	err := r.db.QueryRowContext(ctx, query, post.UserID, post.Title, post.Content, post.ImageURL).Scan(&postID)
 	if err != nil {
 		return -1, err

@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"1337b04rd/internal/domain"
+	"encoding/json"
+	"html/template"
+	"log/slog"
 	"net/http"
 )
 
@@ -27,6 +30,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /post", h.CreatePost)
 }
 
+// POST HANDLER
 
 func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	op := "POST /post"
@@ -40,8 +44,14 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// How to implement that
-	post, err := h.postService.CreatePost(ctx, ???, req.Title, req.Content, req.ImageURL)
+	user, _, err := h.userService.GetOrCreateUser(ctx, req.UserSession)
+	if err != nil {
+		slog.Error("Failed to get user by session:", "OP", op, "err", err)
+		RespondJSON(w, http.StatusInternalServerError, map[string]string{"error":"Unauthorized session"})
+		return
+	}
+	
+	post, err := h.postService.CreatePost(ctx, user.ID, req.Title, req.Content, req.ImageURL)
 	if err != nil {
 		slog.Error("Failed to create post", "op", op, "error", err)
 		RespondJSON(w, http.StatusInternalServerError, map[string]string{"error": "Failed to create post"})
@@ -80,6 +90,13 @@ func (h *Handler) ListArchivedPosts(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusOK, posts)
 }
 
+
+// COMMENT HANDLER
+
+
+
+
+// SESSION HANDLER
 
 func (h *Handler) HandleSession(w http.ResponseWriter, r *http.Request) {
 	op := "GET /"
@@ -127,4 +144,5 @@ func (h *Handler) HandleSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateUserName(w http.ResponseWriter, r *http.Request) {
+	
 }
