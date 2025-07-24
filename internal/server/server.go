@@ -15,6 +15,7 @@ type Server struct {
 func NewServer(config *config.Config, handler *handlers.Handler) *Server {
 	mux := http.NewServeMux()
 	handler.User.UserRoutes(mux)
+	handler.Post.PostRoutes(mux)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", config.ServerConfig.Port),

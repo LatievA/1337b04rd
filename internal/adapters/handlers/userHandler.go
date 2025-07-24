@@ -4,7 +4,6 @@ import (
 	"1337b04rd/internal/domain"
 	"log/slog"
 	"net/http"
-	"text/template"
 )
 
 type UserHandler struct {
@@ -20,6 +19,9 @@ func (h *UserHandler) UserRoutes(mux *http.ServeMux) {
 }
 
 func (h *UserHandler) HandleSession(w http.ResponseWriter, r *http.Request) {
+	// Redirect to /catalog
+	http.Redirect(w, r, "/catalog", http.StatusSeeOther)
+
 	ctx := r.Context()
 
 	cookie, err := r.Cookie("session_token")
@@ -46,19 +48,5 @@ func (h *UserHandler) HandleSession(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 			MaxAge:   7 * 24 * 60 * 60,
 		})
-	}
-
-	tmpl, err := template.ParseFiles("internal/ui/templates/catalog.html")
-	if err != nil {
-		slog.Error("Failed to parse template", "err", err)
-		http.Error(w, "Could not load page", http.StatusInternalServerError)
-		return
-	}
-
-	err = tmpl.Execute(w, "")
-	if err != nil {
-		slog.Error("Failed to execute template", "err", err)
-		http.Error(w, "Could not load page", http.StatusInternalServerError)
-		return
 	}
 }
