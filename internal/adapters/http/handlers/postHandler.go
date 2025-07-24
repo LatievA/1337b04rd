@@ -33,6 +33,7 @@ func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// How to implement that
 	post, err := h.postService.CreatePost(ctx, ???, req.Title, req.Content, req.ImageURL)
 	if err != nil {
 		slog.Error("Failed to create post", "op", op, "error", err)
