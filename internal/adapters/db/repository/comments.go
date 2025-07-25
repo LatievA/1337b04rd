@@ -12,7 +12,7 @@ type CommentRepository struct {
 
 func NewCommentRepository(db *sql.DB) domain.CommentRepository {
 	return &CommentRepository{
-		db:db,
+		db: db,
 	}
 }
 

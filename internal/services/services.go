@@ -38,9 +38,11 @@ func NewUserService(userRepo domain.UserRepository, api domain.RickAndMortyAPI) 
 	return &UserService{userRepo: userRepo, rickAndMortyAPI: api}
 }
 
-func (s *PostService) CreatePost(ctx context.Context, userID int, title, content string, imageURL *string) (*domain.Post, error) {
+func (s *PostService) CreatePost(ctx context.Context, sessionToken, title, content string, imageURL *string) (*domain.Post, error) {
+	
+
 	post := &domain.Post{
-		UserID:     userID,
+		Username:     sessionToken,
 		Title:      title,
 		Content:    content,
 		ImageURL:   imageURL,
@@ -100,7 +102,6 @@ func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) 
 	var isNew bool
 	slog.Info(sessionToken)
 	if sessionToken == "" {
-		slog.Info("EMPY SESSION")
 		newSessionToken, err := s.generateSession()
 		isNew = true
 		if err != nil {
@@ -109,12 +110,10 @@ func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) 
 		sessionToken = newSessionToken
 	} else {
 		user, err := s.userRepo.FindBySessionToken(ctx, sessionToken)
-		slog.Error("ERROR FINDING SESSION", "err", err)
 		if err == nil {
 			slog.Info("Returned user from db")
 			return user, isNew, nil
 		}
-		slog.Info("ELSE")
 		isNew = true
 	}
 
