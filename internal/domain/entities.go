@@ -4,7 +4,8 @@ import "time"
 
 type Post struct {
 	ID         int
-	Username     string
+	UserID     int
+	Username   string
 	Title      string
 	Content    string
 	ImageURL   *string
