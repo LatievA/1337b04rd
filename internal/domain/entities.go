@@ -26,9 +26,9 @@ type Comment struct {
 }
 
 type User struct {
-	ID        int
-	Session   string
-	Name      string
-	AvatarURL *string
-	ExpiresAt time.Time
+	ID           int
+	SessionToken string
+	Name         string
+	AvatarURL    *string
+	ExpiresAt    time.Time
 }
