@@ -4,7 +4,8 @@ import "time"
 
 type Post struct {
 	ID         int
-	Username     string
+	UserID     int
+	Username   string
 	Title      string
 	Content    string
 	ImageURL   *string
@@ -24,9 +25,9 @@ type Comment struct {
 }
 
 type User struct {
-	ID        int
-	Session   string
-	Name      string
-	AvatarURL *string
-	ExpiresAt time.Time
+	ID           int
+	SessionToken string
+	Name         string
+	AvatarURL    *string
+	ExpiresAt    time.Time
 }

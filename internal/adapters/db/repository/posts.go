@@ -69,7 +69,7 @@ func (r *PostRepository) FindByID(ctx context.Context, id int) (*domain.Post, er
 
 func (r *PostRepository) FindAll(ctx context.Context, archived bool) ([]*domain.Post, error) {
 	posts := []*domain.Post{}
-	query := `SELECT * FROM posts WHERE archived = $1`
+	query := `SELECT * FROM posts WHERE is_archived = $1`
 
 	rows, err := r.db.QueryContext(ctx, query, archived)
 	if err != nil {
