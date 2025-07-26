@@ -9,7 +9,7 @@ CREATE TABLE user_sessions (
 
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
-    username REFERENCES user_sessions(name) ON DELETE CASCADE,
+    session_id INTEGER REFERENCES user_sessions(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
     image_url TEXT,
