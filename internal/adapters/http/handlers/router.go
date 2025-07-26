@@ -21,5 +21,16 @@ func NewHandler(userService domain.UserService, postService domain.PostService, 
 
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /posts", h.AuthMiddleware(http.HandlerFunc(h.ListPosts)))
-	mux.Handle("GET /archive", h.AuthMiddleware(http.HandlerFunc(h.ListArchivedPosts)))
+	// mux.Handle("GET /archive", h.AuthMiddleware(http.HandlerFunc(h.ListArchivedPosts)))
 }
+
+/*
+user, ok := GetUserFromContext(r.Context())
+    if !ok {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+    
+    // Use user in your logic
+    slog.Info("User accessing posts", "userID", user.ID)
+*/

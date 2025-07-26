@@ -1,19 +1,11 @@
 package handlers
 
 import (
-	"encoding/json"
-	"net/http"
+	"1337b04rd/internal/domain"
+	"context"
 )
 
-func RespondJSON(w http.ResponseWriter, statusCode int, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-
-	if data == nil {
-		return
-	}
-
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
-	}
+func GetUserFromContext(ctx context.Context) (*domain.User, bool) {
+	user, ok := ctx.Value("user").(*domain.User)
+	return user, ok
 }

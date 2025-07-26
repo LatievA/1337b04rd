@@ -1,34 +1,31 @@
 package handlers
 
 import (
+	"html/template"
 	"log/slog"
 	"net/http"
 )
 
 func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
-	op := "GET /posts"
 	ctx := r.Context()
-
 	posts, err := h.postService.ListPosts(ctx, false)
 	if err != nil {
-		slog.Error("Failed to get posts!", "OP", op, "error", err)
-		RespondJSON(w, http.StatusInternalServerError, map[string]string{"error": "Internal Server Error"})
+		slog.Error("Failed to fetch posts", "err", err)
+		http.Error(w, "Failed to fetch posts", http.StatusInternalServerError)
 		return
 	}
-	slog.Info("Posts extracted succesfully!", "OP", op)
-	RespondJSON(w, http.StatusOK, posts)
-}
 
-func (h *Handler) ListArchivedPosts(w http.ResponseWriter, r *http.Request) {
-	op := "GET /archive"
-	ctx := r.Context()
-
-	posts, err := h.postService.ListPosts(ctx, true)
+	tmpl, err := template.ParseFiles("internal/ui/templates/catalog.html")
 	if err != nil {
-		slog.Error("Failed to get posts!", "OP", op, "error", err)
-		RespondJSON(w, http.StatusInternalServerError, map[string]string{"error": "Internal Server Error"})
+		slog.Error("Failed to parse template", "err", err)
+		http.Error(w, "Could not load page", http.StatusInternalServerError)
 		return
 	}
-	slog.Info("Posts extracted succesfully!", "OP", op)
-	RespondJSON(w, http.StatusOK, posts)
+
+	err = tmpl.Execute(w, posts)
+	if err != nil {
+		slog.Error("Failed to execute template", "err", err)
+		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		return
+	}
 }
