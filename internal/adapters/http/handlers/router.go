@@ -20,8 +20,8 @@ func NewHandler(userService domain.UserService, postService domain.PostService, 
 }
 
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
-	mux.Handle("GET /posts", h.AuthMiddleware(http.HandlerFunc(h.ListPosts)))
-	// mux.Handle("GET /archive", h.AuthMiddleware(http.HandlerFunc(h.ListArchivedPosts)))
+	mux.Handle("GET /catalog.html", h.AuthMiddleware(http.HandlerFunc(h.ListPosts)))
+	mux.Handle("GET /archive.html", h.AuthMiddleware(http.HandlerFunc(h.ListArchivedPosts)))
 }
 
 /*
