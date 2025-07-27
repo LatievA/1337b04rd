@@ -5,7 +5,7 @@ import (
 )
 
 type PostService interface {
-	CreatePost(ctx context.Context, username, title, content string, imageURL *string) (*Post, error)
+	CreatePost(ctx context.Context, userID int,username, title, content string, imageURL *string) (*Post, error)
 	GetPostByID(ctx context.Context, postID int) (*Post, error)
 	ListPosts(ctx context.Context, archived bool) ([]*Post, error)
 	ArchiveOldPosts(ctx context.Context) error

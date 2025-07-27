@@ -6,6 +6,6 @@ import (
 )
 
 func GetUserFromContext(ctx context.Context) (*domain.User, bool) {
-	user, ok := ctx.Value("user").(*domain.User)
+	user, ok := ctx.Value(userContextKey).(*domain.User)
 	return user, ok
 }

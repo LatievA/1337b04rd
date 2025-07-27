@@ -15,9 +15,10 @@ func NewPostService(postRepo domain.PostRepository, commentRepo domain.CommentRe
 	return &PostService{postRepo: postRepo, commentRepo: commentRepo}
 }
 
-func (s *PostService) CreatePost(ctx context.Context, name, title, content string, imageURL *string) (*domain.Post, error) {
+func (s *PostService) CreatePost(ctx context.Context, userID int, name, title, content string, imageURL *string) (*domain.Post, error) {
 
 	post := &domain.Post{
+		UserID:    userID,
 		Username:   name,
 		Title:      title,
 		Content:    content,
