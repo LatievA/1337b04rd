@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+	"path"
 )
 
 func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +63,7 @@ func (h *Handler) ListArchivedPosts(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	postID := r.URL.Query().Get("id")
+	postID := path.Base(r.URL.Path)
 	if postID == "" {
 		http.Error(w, "Post ID is required", http.StatusBadRequest)
 		return
@@ -96,7 +97,7 @@ func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetArchivePost(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	postID := r.URL.Query().Get("id")
+	postID := path.Base(r.URL.Path)
 	if postID == "" {
 		http.Error(w, "Post ID is required", http.StatusBadRequest)
 		return

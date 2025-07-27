@@ -33,7 +33,7 @@ func (r *PostRepository) FindByID(ctx context.Context, id int) (*domain.Post, er
 
 	query := `SELECT * FROM posts WHERE id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&post.ID, &post.UserID, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt, &post.ArchivedAt, &post.Archived)
+		&post.ID, &post.UserID, &post.Username, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt, &post.ArchivedAt, &post.Archived)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("post with id %d doesn't exist", id)
