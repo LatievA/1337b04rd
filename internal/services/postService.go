@@ -3,22 +3,28 @@ package services
 import (
 	"1337b04rd/internal/domain"
 	"context"
+	"fmt"
 	"time"
 )
 
 type PostService struct {
 	postRepo    domain.PostRepository
 	commentRepo domain.CommentRepository
+	userRepo    domain.UserRepository
 }
 
-func NewPostService(postRepo domain.PostRepository, commentRepo domain.CommentRepository) domain.PostService {
-	return &PostService{postRepo: postRepo, commentRepo: commentRepo}
+func NewPostService(postRepo domain.PostRepository, commentRepo domain.CommentRepository, userRepo domain.UserRepository) domain.PostService {
+	return &PostService{postRepo: postRepo, commentRepo: commentRepo, userRepo: userRepo}
 }
 
-func (s *PostService) CreatePost(ctx context.Context, name, title, content string, imageURL *string) (*domain.Post, error) {
+func (s *PostService) CreatePost(ctx context.Context, sessionToken, title, content string, imageURL *string) (*domain.Post, error) {
+	userID, err := s.userRepo.GetUserIDBySessionToken(ctx, sessionToken)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get session id by token: %s", err)
+	}
 
 	post := &domain.Post{
-		Username:   name,
+		UserID:     userID,
 		Title:      title,
 		Content:    content,
 		ImageURL:   imageURL,
@@ -27,7 +33,7 @@ func (s *PostService) CreatePost(ctx context.Context, name, title, content strin
 	}
 	id, err := s.postRepo.Save(ctx, post)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to save created post: %s", err)
 	}
 	post.ID = id
 	return post, nil

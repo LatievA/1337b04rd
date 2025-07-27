@@ -32,7 +32,7 @@ func RunServer() {
 	avatarProvider := external_api.NewRickAndMortyClient()
 
 	userService := services.NewUserService(userRepo, avatarProvider)
-	postService := services.NewPostService(postRepo, commentRepo)
+	postService := services.NewPostService(postRepo, commentRepo, userRepo)
 	commentService := services.NewCommentService(commentRepo, postRepo)
 
 	handler := handlers.NewHandler(userService, postService, commentService)
@@ -40,5 +40,3 @@ func RunServer() {
 
 	server.Run()
 }
-
-// YOU DID UNBELIEVABLE FRONTEND 0_0 | why are you not in frontend branch

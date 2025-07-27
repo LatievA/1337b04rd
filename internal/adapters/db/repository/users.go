@@ -31,6 +31,17 @@ func (r *UserRepository) FindBySessionToken(ctx context.Context, sessionToken st
 	return &user, nil
 }
 
+func (r *UserRepository) GetUserIDBySessionToken(ctx context.Context, sesionToken string) (int, error) {
+	var userID int
+	query := `SELECT id FROM user_sessions WHERE session_token = $1`
+	err := r.db.QueryRowContext(ctx, query, sesionToken).Scan(&userID)
+	if err != nil {
+		return -1, err
+	}
+
+	return userID, nil
+}
+
 func (r *UserRepository) Save(ctx context.Context, user *domain.User) (int, error) {
 	var userID int
 	query := `INSERT INTO user_sessions(session_token, name, avatar_url)
