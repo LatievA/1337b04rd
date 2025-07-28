@@ -135,5 +135,12 @@ func (r *PostRepository) Update(ctx context.Context, post *domain.Post) error {
 }
 
 func (r *PostRepository) ArchiveExpired(ctx context.Context) error {
+	query := `UPDATE posts
+			  SET is_archived = true
+			  WHERE is_archived = false AND archived_at < NOW()`
+	_, err := r.db.ExecContext(ctx, query)
+	if err != nil {
+		return fmt.Errorf("failed to archive expired posts: %w", err)
+	}
 	return nil
 }

@@ -69,7 +69,7 @@ func (h *Handler) ListArchivedPosts(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not load page", http.StatusInternalServerError)
 		return
 	}
-}
+} // Works correctly
 
 func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -127,7 +127,7 @@ func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not load page", http.StatusInternalServerError)
 		return
 	}
-}
+} // Works correctly
 
 func (h *Handler) GetArchivePost(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -146,6 +146,29 @@ func (h *Handler) GetArchivePost(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Failed to fetch post", "err", err)
 		http.Error(w, "Failed to fetch post", http.StatusInternalServerError)
 		return
+	}
+	post.User, err = h.userService.GetUserByID(ctx, post.UserID)
+	if err != nil {
+		slog.Error("Failed to fetch post user", "err", err)
+		http.Error(w, "Failed to fetch post user", http.StatusInternalServerError)
+		return
+	}
+
+	for _, comment := range post.Comments {
+		comment.User, _ = h.userService.GetUserByID(ctx, comment.UserID)
+		if comment.User == nil {
+			slog.Error("Failed to fetch comment user", "commentID", comment.ID)
+			http.Error(w, "Failed to fetch comment user", http.StatusInternalServerError)
+			return
+		}
+		if comment.ParentID > 0 {
+			for _, comment1 := range post.Comments {
+				if comment1.ID == comment.ParentID {
+					comment1.Comments = append(comment1.Comments, comment)
+					break
+				}
+			}
+		}
 	}
 
 	tmpl, err := template.ParseFiles("internal/ui/templates/archive-post.html")

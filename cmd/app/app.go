@@ -38,13 +38,13 @@ func RunServer() {
 
 	handler := handlers.NewHandler(userService, postService, commentService, s3Service)
 	server := server.NewServer(config, handler)
-
+	
+	handler.StartArchiveWorker()
 	server.Run()
 }
 
 // YOU DID UNBELIEVABLE FRONTEND 0_0 | why are you not in frontend branch
 
 // TODO:
-// - Add archivation of posts after time
 // - Add error page implementation
 // - Add triple-s as a docker container

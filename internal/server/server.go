@@ -27,6 +27,7 @@ func NewServer(config *config.Config, handler *handlers.Handler) *Server {
 }
 
 func (s *Server) Run() error {
+	
 	slog.Info("Server is starting", "port", s.httpServer.Addr)
 	return s.httpServer.ListenAndServe()
 }
