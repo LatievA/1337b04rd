@@ -11,6 +11,7 @@ import (
 type Config struct {
 	ServerConfig *ServerConfig
 	DBConfig     *DBConfig
+	S3Config	 *S3Config
 }
 
 type ServerConfig struct {
@@ -25,6 +26,10 @@ type DBConfig struct {
 	DBPassword string
 }
 
+type S3Config struct {
+	BaseURL string
+}
+
 func NewConfig() (*Config, error) {
 	dbConfig := &DBConfig{
 		DBHost:     getEnv("DB_HOST", "db"),
@@ -32,6 +37,10 @@ func NewConfig() (*Config, error) {
 		DBName:     getEnv("DB_NAME", "1337b04rd"),
 		DBUser:     getEnv("DB_USER", "postgres"),
 		DBPassword: getEnv("DB_PASSWORD", "postgres"),
+	}
+
+	s3Config := &S3Config{
+		BaseURL: getEnv("S3_BASE_URL", "http://localhost:8080"),
 	}
 
 	serverConfig := &ServerConfig{
@@ -45,6 +54,7 @@ func NewConfig() (*Config, error) {
 	return &Config{
 		DBConfig:     dbConfig,
 		ServerConfig: serverConfig,
+		S3Config:     s3Config,
 	}, nil
 }
 

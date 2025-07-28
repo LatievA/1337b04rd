@@ -4,7 +4,6 @@ import (
 	"1337b04rd/internal/adapters/db/repository"
 	"1337b04rd/internal/adapters/external_api"
 	"1337b04rd/internal/adapters/http/handlers"
-	"1337b04rd/internal/adapters/s3"
 	"1337b04rd/internal/config"
 	"1337b04rd/internal/logger"
 	"1337b04rd/internal/server"
@@ -30,14 +29,14 @@ func RunServer() {
 	commentRepo := repository.NewCommentRepository(db)
 	userRepo := repository.NewUserRepository(db)
 
-	// s3Client := s3.NewHTTPClient(config.S3Config.BaseURL)
 	avatarProvider := external_api.NewRickAndMortyClient()
 
 	userService := services.NewUserService(userRepo, avatarProvider)
 	postService := services.NewPostService(postRepo, commentRepo, userRepo)
 	commentService := services.NewCommentService(commentRepo, postRepo)
+	s3Service := services.NewS3Service("http://host.docker.internal:8080")
 
-	handler := handlers.NewHandler(userService, postService, commentService)
+	handler := handlers.NewHandler(userService, postService, commentService, s3Service)
 	server := server.NewServer(config, handler)
 
 	server.Run()

@@ -9,13 +9,15 @@ type Handler struct {
 	userService    domain.UserService
 	postService    domain.PostService
 	commentService domain.CommentService
+	s3Service      domain.S3Service
 }
 
-func NewHandler(userService domain.UserService, postService domain.PostService, commentService domain.CommentService) *Handler {
+func NewHandler(userService domain.UserService, postService domain.PostService, commentService domain.CommentService, s3Service domain.S3Service) *Handler {
 	return &Handler{
 		userService:    userService,
 		postService:    postService,
 		commentService: commentService,
+		s3Service:      s3Service,
 	}
 }
 
@@ -35,7 +37,7 @@ user, ok := GetUserFromContext(r.Context())
         http.Error(w, "Unauthorized", http.StatusUnauthorized)
         return
     }
-    
+
     // Use user in your logic
     slog.Info("User accessing posts", "userID", user.ID)
 */

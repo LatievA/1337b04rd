@@ -1,11 +1,14 @@
 package handlers
 
 import (
+	"fmt"
 	"html/template"
+	"io"
 	"log/slog"
 	"net/http"
 	"path"
 	"strconv"
+	"time"
 )
 
 type FormData struct {
@@ -17,7 +20,7 @@ type FormData struct {
 
 type TemplateData struct {
 	FormData FormData
-	Error   map[string]string
+	Error    map[string]string
 }
 
 func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
@@ -153,7 +156,7 @@ func (h *Handler) CreatePostForm(w http.ResponseWriter, r *http.Request) {
 
 	data := TemplateData{
 		FormData: FormData{},
-		Error:   make(map[string]string),
+		Error:    make(map[string]string),
 	}
 
 	err = tmpl.Execute(w, data)
@@ -214,33 +217,29 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add triple-s implemenatation for file upload
-	// Handle file upload
-    var imagePath string
-    file, fileHeader, err := r.FormFile("image")
-    if err == nil && fileHeader != nil {
-        defer file.Close()
-        
-        // Validate file type
-        if !isValidImageType(fileHeader) {
-            errors["image"] = "Invalid image format"
-            data := TemplateData{
-                FormData: FormData{Name: name, Title: title, Content: content},
-                Error:   errors,
-            }
-            tmpl := template.Must(template.ParseFiles("create-post.html"))
-            tmpl.Execute(w, data)
-            return
-        }
-        
-        // Save file
-        imagePath, err = saveUploadedFile(file, fileHeader)
-        if err != nil {
-            http.Error(w, "Failed to save image", http.StatusInternalServerError)
-            return
-        }
-    }
+	var imageURL string
+	file, fh, err := r.FormFile("image")
+	if err == nil && fh != nil {
+		defer file.Close()
 
-	_, err = h.postService.CreatePost(ctx, user.ID, user.Name, title, content, imagePath)
+		raw, err := io.ReadAll(file)
+		if err != nil {
+			slog.Error("Failed to read image", "err", err)
+			http.Error(w, "Failed to read image", http.StatusInternalServerError)
+			return
+		}
+
+		key := fmt.Sprintf("%d-%s", time.Now().Unix(), fh.Filename)
+
+		url, err := h.s3Service.UploadImage(ctx, raw, "posts", key)
+		if err != nil {
+			slog.Error("Failed to upload image to S3", "err", err)
+			http.Error(w, "Failed to upload to S3", http.StatusInternalServerError)
+			return
+		}
+		imageURL = url
+	}
+	_, err = h.postService.CreatePost(ctx, user.ID, user.Name, title, content, imageURL)
 	if err != nil {
 		slog.Error("Failed to create post", "err", err)
 		http.Error(w, "Failed to create post", http.StatusInternalServerError)

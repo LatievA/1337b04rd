@@ -11,6 +11,7 @@ type PostService struct {
 	postRepo    domain.PostRepository
 	commentRepo domain.CommentRepository
 	userRepo    domain.UserRepository
+	s3Service   domain.S3Service
 }
 
 func NewPostService(postRepo domain.PostRepository, commentRepo domain.CommentRepository, userRepo domain.UserRepository) domain.PostService {
@@ -20,7 +21,7 @@ func NewPostService(postRepo domain.PostRepository, commentRepo domain.CommentRe
 func (s *PostService) CreatePost(ctx context.Context, userID int, name, title, content, imageURL string) (*domain.Post, error) {
 
 	post := &domain.Post{
-		UserID:    userID,
+		UserID:     userID,
 		Username:   name,
 		Title:      title,
 		Content:    content,

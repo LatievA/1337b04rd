@@ -42,7 +42,7 @@ type UserRepository interface {
 }
 
 type S3Service interface {
-	UploadImage(ctx context.Context, fileData []byte, filename string) (string, error)
+	UploadImage(ctx context.Context, fileData []byte, bucketName, objectKey string) (string, error)
 }
 
 type RickAndMortyAPI interface {
