@@ -15,6 +15,25 @@ func NewUserRepository(db *sql.DB) domain.UserRepository {
 	return &UserRepository{db: db}
 }
 
+func (r *UserRepository) FindByID(ctx context.Context, userID int) (*domain.User, error) {
+	var user domain.User
+	query := `SELECT id, session_token, name, avatar_url, expires_at FROM user_sessions WHERE id = $1`
+	err := r.db.QueryRowContext(ctx, query, userID).Scan(
+		&user.ID,
+		&user.SessionToken,
+		&user.Name,
+		&user.AvatarURL,
+		&user.ExpiresAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
 func (r *UserRepository) FindBySessionToken(ctx context.Context, sessionToken string) (*domain.User, error) {
 	var user domain.User
 	query := `SELECT id, session_token, name, avatar_url, expires_at FROM user_sessions WHERE session_token = $1`

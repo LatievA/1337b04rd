@@ -44,7 +44,7 @@ func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) 
 
 	newUser := &domain.User{
 		Name:         name,
-		AvatarURL:    &avatarURL,
+		AvatarURL:    avatarURL,
 		SessionToken: sessionToken,
 	}
 	id, err := s.userRepo.Save(ctx, newUser)
@@ -53,6 +53,14 @@ func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) 
 	}
 	newUser.ID = id
 	return newUser, isNew, nil
+}
+
+func (s *UserService) GetUserByID(ctx context.Context, userID int) (*domain.User, error) {
+	user, err := s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("user not found")
+	}
+	return user, nil
 }
 
 func (s *UserService) UpdateUserName(ctx context.Context, userID int, newName string) error {

@@ -47,3 +47,4 @@ func RunServer() {
 // TODO:
 // - Add archivation of posts after time
 // - Add error page implementation
+// - Add triple-s as a docker container

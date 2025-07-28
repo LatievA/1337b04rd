@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type FormData struct {
+type PostFormData struct {
 	Name     string
 	Title    string
 	Content  string
@@ -19,7 +19,7 @@ type FormData struct {
 }
 
 type TemplateData struct {
-	FormData FormData
+	FormData PostFormData
 	Error    map[string]string
 }
 
@@ -69,7 +69,7 @@ func (h *Handler) ListArchivedPosts(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not load page", http.StatusInternalServerError)
 		return
 	}
-} // Work correctly
+}
 
 func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -89,6 +89,30 @@ func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to fetch post", http.StatusInternalServerError)
 		return
 	}
+	post.User, err = h.userService.GetUserByID(ctx, post.UserID)
+	if err != nil {
+		slog.Error("Failed to fetch post user", "err", err)
+		http.Error(w, "Failed to fetch post user", http.StatusInternalServerError)
+		return
+	}
+
+	for _, comment := range post.Comments {
+		comment.User, _ = h.userService.GetUserByID(ctx, comment.UserID)
+		if comment.User == nil {
+			slog.Error("Failed to fetch comment user", "commentID", comment.ID)
+			http.Error(w, "Failed to fetch comment user", http.StatusInternalServerError)
+			return
+		}
+		if comment.ParentID > 0 {
+			for _, comment1 := range post.Comments {
+				if comment1.ID == comment.ParentID {
+					comment1.Comments = append(comment1.Comments, comment)
+					break
+				}
+			}
+		}
+	}
+
 
 	tmpl, err := template.ParseFiles("internal/ui/templates/post.html")
 	if err != nil {
@@ -155,7 +179,7 @@ func (h *Handler) CreatePostForm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := TemplateData{
-		FormData: FormData{},
+		FormData: PostFormData{},
 		Error:    make(map[string]string),
 	}
 
@@ -165,7 +189,7 @@ func (h *Handler) CreatePostForm(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not load page", http.StatusInternalServerError)
 		return
 	}
-}
+} // Works correctly
 
 func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -197,7 +221,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	// If validation fails, re-display form with errors
 	if len(errors) > 0 {
 		data := TemplateData{
-			FormData: FormData{
+			FormData: PostFormData{
 				Name:    name,
 				Title:   title,
 				Content: content,
@@ -247,4 +271,4 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/catalog", http.StatusSeeOther)
-}
+} // Works correctly

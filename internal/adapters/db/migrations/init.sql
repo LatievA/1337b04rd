@@ -23,7 +23,7 @@ CREATE TABLE comments (
     id SERIAL PRIMARY KEY,
     session_id INTEGER REFERENCES user_sessions(id) ON DELETE CASCADE,
     post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
-    parent_comment_id INTEGER REFERENCES comments(id) ON DELETE CASCADE,
+    parent_comment_id INTEGER,
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );

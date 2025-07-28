@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1337b04rd - Post #{{.Post.ID}}</title>
+    <title>1337b04rd - Post #{{.ID}}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
         
@@ -231,6 +231,20 @@
             text-decoration: underline;
         }
         
+        /* Nested replies styling */
+        .nested-replies {
+            margin-top: 15px;
+            margin-left: 20px;
+            border-left: 2px solid var(--border-color);
+            padding-left: 20px;
+        }
+        
+        .nested-replies .comment {
+            background: rgba(10, 10, 10, 0.8);
+            border-left: 2px solid var(--reply-color);
+            margin-bottom: 10px;
+        }
+        
         .comment-form {
             background: var(--hover-color);
             border: 2px solid var(--border-color);
@@ -326,70 +340,62 @@
                 flex-direction: column;
                 align-items: center;
             }
+            
+            .nested-replies {
+                margin-left: 10px;
+                padding-left: 10px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1 class="title">1337b04rd - Post #{{.Post.ID}}</h1>
+            <h1 class="title">1337b04rd - Post #{{.ID}}</h1>
         </header>
         
         <nav class="nav">
             <a href="/catalog" class="nav-btn">[Back to Catalog]</a>
             <a href="/archive" class="nav-btn">[Archive]</a>
-            <a href="/create" class="nav-btn">[New Thread]</a>
+            <a href="/create-post" class="nav-btn">[New Thread]</a>
         </nav>
         
         <main>
             <div class="post-container">
                 <div class="post-header">
                     <div class="post-info">
-                        <img src="{{.Post.UserAvatar}}" alt="User Avatar" class="post-avatar">
+                        <img src="{{.User.AvatarURL}}" alt="User Avatar" class="post-avatar">
                         <div class="post-details">
-                            <span class="post-user">{{.Post.UserName}}</span>
-                            <span class="post-id" onclick="replyTo('{{.Post.ID}}')">No.{{.Post.ID}}</span>
+                            <span class="post-user">{{.Username}}</span>
+                            <span class="post-id">No.{{.ID}}</span>
                         </div>
                     </div>
-                    <div class="post-time">{{.Post.CreatedAt.Format "2006-01-02 15:04:05"}}</div>
+                    <div class="post-time">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</div>
                 </div>
                 
-                <h2 class="post-title">{{.Post.Title}}</h2>
+                <h2 class="post-title">{{.Title}}</h2>
                 
-                {{if .Post.ImageURL}}
-                    <img src="{{.Post.ImageURL}}" alt="Post image" class="post-image">
+                {{if .ImageURL}}
+                    <img src="{{.ImageURL}}" alt="Post image" class="post-image">
                 {{end}}
                 
-                <div class="post-content">{{.Post.Content}}</div>
+                <div class="post-content">{{.Content}}</div>
             </div>
             
             {{if .Comments}}
                 <div class="comments-section">
                     <div class="comments-header">Comments ({{len .Comments}})</div>
                     {{range .Comments}}
-                        <div class="comment">
-                            <div class="comment-header">
-                                <div class="comment-info">
-                                    <img src="{{.UserAvatar}}" alt="User Avatar" class="comment-avatar">
-                                    <span class="comment-user">{{.UserName}}</span>
-                                    <span class="comment-id" onclick="replyTo('{{.ID}}')">No.{{.ID}}</span>
-                                </div>
-                                <div class="comment-time">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</div>
-                            </div>
-                            {{if .ReplyToID}}
-                                <div class="reply-to">
-                                    <a href="#comment-{{.ReplyToID}}">&gt;&gt;{{.ReplyToID}}</a>
-                                </div>
-                            {{end}}
-                            <div class="comment-content">{{.Content}}</div>
-                        </div>
+                        {{if not .ParentID}}
+                            {{template "comment" .}}
+                        {{end}}
                     {{end}}
                 </div>
             {{end}}
             
             <div class="comment-form">
                 <div class="form-title">Add Comment</div>
-                <form action="/post/{{.Post.ID}}/comment" method="POST">
+                <form action="/post/{{.ID}}/comment" method="POST">
                     <div id="reply-info" class="reply-info" style="display: none;">
                         Replying to: <span id="reply-target"></span>
                         <input type="hidden" name="reply_to" id="reply-to-input">
@@ -415,6 +421,35 @@
             <p>&copy; 2025 1337b04rd - Anonymous discussion</p>
         </footer>
     </div>
+    
+    {{/* Recursive comment template */}}
+    {{define "comment"}}
+        <div class="comment" id="comment-{{.ID}}">
+            <div class="comment-header">
+                <div class="comment-info">
+                    <img src="{{.User.AvatarURL}}" alt="User Avatar" class="comment-avatar">
+                    <span class="comment-user">{{.User.Name}}</span>
+                    <span class="comment-id" onclick="replyTo('{{.ID}}')">No.{{.ID}}</span>
+                </div>
+                <div class="comment-time">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</div>
+            </div>
+            {{if .ParentID}}
+                <div class="reply-to">
+                    <a href="#comment-{{.ParentID}}">&gt;&gt;{{.ParentID}}</a>
+                </div>
+            {{end}}
+            <div class="comment-content">{{.Content}}</div>
+            
+            {{/* Recursively render nested replies */}}
+            {{if .Comments}}
+                <div class="nested-replies">
+                    {{range .Comments}}
+                        {{template "comment" .}}
+                    {{end}}
+                </div>
+            {{end}}
+        </div>
+    {{end}}
     
     <script>
         function replyTo(id) {

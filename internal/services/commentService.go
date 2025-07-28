@@ -22,14 +22,10 @@ func (s *CommentService) AddComment(ctx context.Context, userID, postID, parentI
 		return nil, errors.New("post not found")
 	}
 
-	var parentPtr *int
-	if parentID > 0 {
-		parentPtr = &parentID
-	}
-
 	comment := &domain.Comment{
 		UserID:    userID,
-		ParentID:  parentPtr,
+		PostID:   postID,
+		ParentID:  parentID,
 		Content:   content,
 		CreatedAt: time.Now(),
 	}
@@ -43,4 +39,12 @@ func (s *CommentService) AddComment(ctx context.Context, userID, postID, parentI
 
 func (s *CommentService) GetCommentsByPostID(ctx context.Context, postID int) ([]*domain.Comment, error) {
 	return s.commentRepo.FindByPostID(ctx, postID)
+}
+
+func (s *CommentService) GetCommentByID(ctx context.Context, commentID int) (*domain.Comment, error) {
+	comment, err := s.commentRepo.FindByID(ctx, commentID)
+	if err != nil {
+		return nil, errors.New("comment not found")
+	}
+	return comment, nil
 }

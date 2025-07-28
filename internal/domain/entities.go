@@ -6,10 +6,10 @@ type Post struct {
 	ID         int
 	UserID     int
 	Username   string
-	AvatarURL  *string
 	Title      string
 	Content    string
 	ImageURL   string
+	User       *User
 	Comments   []*Comment
 	CreatedAt  time.Time
 	ArchivedAt time.Time
@@ -18,18 +18,19 @@ type Post struct {
 
 type Comment struct {
 	ID        int
-	User      *User
 	UserID    int
 	PostID    int
-	ParentID  *int
+	ParentID  int
 	Content   string
 	CreatedAt time.Time
+	User      *User
+	Comments  []*Comment
 }
 
 type User struct {
 	ID           int
 	SessionToken string
 	Name         string
-	AvatarURL    *string
+	AvatarURL    string
 	ExpiresAt    time.Time
 }

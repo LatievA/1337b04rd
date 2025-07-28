@@ -28,7 +28,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /archive-post/{id}", h.AuthMiddleware(http.HandlerFunc(h.GetArchivePost)))
 	mux.Handle("GET /create-post", h.AuthMiddleware(http.HandlerFunc(h.CreatePostForm)))
 	mux.Handle("POST /create-post", h.AuthMiddleware(http.HandlerFunc(h.CreatePost)))
-	mux.Handle("POST /submit-comment", h.AuthMiddleware(http.HandlerFunc(h.SubmitComment)))
+	mux.Handle("POST /post/{id}/comment", h.AuthMiddleware(http.HandlerFunc(h.CreateComment)))
 }
 
 /*

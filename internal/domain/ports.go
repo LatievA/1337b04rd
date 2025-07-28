@@ -14,9 +14,11 @@ type PostService interface {
 type CommentService interface {
 	AddComment(ctx context.Context, userID, postID, parentID int, content string) (*Comment, error)
 	GetCommentsByPostID(ctx context.Context, postID int) ([]*Comment, error)
+	GetCommentByID(ctx context.Context, commentID int) (*Comment, error)
 }
 
 type UserService interface {
+	GetUserByID(ctx context.Context, userID int) (*User, error)
 	GetOrCreateUser(ctx context.Context, sessionToken string) (*User, bool, error)
 	UpdateUserName(ctx context.Context, userID int, newName string) error
 }
@@ -32,9 +34,11 @@ type PostRepository interface {
 type CommentRepository interface {
 	Save(ctx context.Context, comment *Comment) (int, error)
 	FindByPostID(ctx context.Context, postID int) ([]*Comment, error)
+	FindByID(ctx context.Context, commentID int) (*Comment, error)
 }
 
 type UserRepository interface {
+	FindByID(ctx context.Context, userID int) (*User, error)
 	FindBySessionToken(ctx context.Context, sessionToken string) (*User, error)
 	Save(ctx context.Context, user *User) (int, error)
 	UpdateName(ctx context.Context, userID int, newName string) error
