@@ -18,9 +18,9 @@ func NewPostRepository(db *sql.DB) domain.PostRepository {
 
 func (r *PostRepository) Save(ctx context.Context, post *domain.Post) (int, error) {
 	var postID int
-	query := `INSERT INTO posts(session_id, title, content, image_url)
-			  VALUES ($1, $2, $3, $4) RETURNING id`
-	err := r.db.QueryRowContext(ctx, query, post.UserID, post.Title, post.Content, post.ImageURL).Scan(&postID)
+	query := `INSERT INTO posts(session_id, username, title, content, image_url)
+			  VALUES ($1, $2, $3, $4, $5) RETURNING id`
+	err := r.db.QueryRowContext(ctx, query, post.UserID, post.Username, post.Title, post.Content, post.ImageURL).Scan(&postID)
 	if err != nil {
 		return -1, err
 	}
@@ -33,7 +33,7 @@ func (r *PostRepository) FindByID(ctx context.Context, id int) (*domain.Post, er
 
 	query := `SELECT * FROM posts WHERE id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&post.ID, &post.UserID, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt, &post.ArchivedAt, &post.Archived)
+		&post.ID, &post.UserID, &post.Username, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt, &post.ArchivedAt, &post.Archived)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("post with id %d doesn't exist", id)
@@ -79,7 +79,7 @@ func (r *PostRepository) FindAll(ctx context.Context, archived bool) ([]*domain.
 
 	for rows.Next() {
 		post := &domain.Post{}
-		err = rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt, &post.ArchivedAt, &post.Archived)
+		err = rows.Scan(&post.ID, &post.UserID, &post.Username, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt, &post.ArchivedAt, &post.Archived)
 		if err != nil {
 			return nil, err
 		}

@@ -10,11 +10,12 @@ CREATE TABLE user_sessions (
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
     session_id INTEGER REFERENCES user_sessions(id) ON DELETE CASCADE,
+    username TEXT,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
     image_url TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
-    archived_at TIMESTAMP DEFAULT NOW() + INTERVAL '15 minute',
+    archived_at TIMESTAMP DEFAULT NOW() + INTERVAL '15 minutes',
     is_archived BOOLEAN DEFAULT FALSE
 );
 

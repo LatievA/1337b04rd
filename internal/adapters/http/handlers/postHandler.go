@@ -4,38 +4,20 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
+	"path"
+	"strconv"
 )
 
-func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+type FormData struct {
+	Name     string
+	Title    string
+	Content  string
+	ImageURL string
+}
 
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Invalid form data", http.StatusBadRequest)
-		return
-	}
-	sessionToken, err := r.Cookie("session_token")
-	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	title := r.FormValue("title")
-	content := r.FormValue("content")
-	imageURL := r.FormValue("image_url")
-
-	var imageURLPtr *string
-	if imageURL != "" {
-		imageURLPtr = &imageURL
-	}
-
-	_, err = h.postService.CreatePost(ctx, sessionToken.Value, title, content, imageURLPtr)
-	if err != nil {
-		slog.Error("Failed to create post", "err", err)
-		http.Error(w, "Failed to create post", http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/catalog", http.StatusSeeOther)
+type TemplateData struct {
+	FormData FormData
+	Error   map[string]string
 }
 
 func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
@@ -60,11 +42,11 @@ func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not load page", http.StatusInternalServerError)
 		return
 	}
-}
+} // Works correctly
 
 func (h *Handler) ListArchivedPosts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	posts, err := h.postService.ListPosts(ctx, false)
+	posts, err := h.postService.ListPosts(ctx, true)
 	if err != nil {
 		slog.Error("Failed to fetch posts", "err", err)
 		http.Error(w, "Failed to fetch posts", http.StatusInternalServerError)
@@ -84,4 +66,186 @@ func (h *Handler) ListArchivedPosts(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not load page", http.StatusInternalServerError)
 		return
 	}
+} // Work correctly
+
+func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	postID := path.Base(r.URL.Path)
+	if postID == "" {
+		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		return
+	}
+	ipostID, err := strconv.Atoi(postID)
+	if err != nil {
+		slog.Error("Invalid post ID", "err", err)
+	}
+
+	post, err := h.postService.GetPostByID(ctx, ipostID)
+	if err != nil {
+		slog.Error("Failed to fetch post", "err", err)
+		http.Error(w, "Failed to fetch post", http.StatusInternalServerError)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("internal/ui/templates/post.html")
+	if err != nil {
+		slog.Error("Failed to parse template", "err", err)
+		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, post)
+	if err != nil {
+		slog.Error("Failed to execute template", "err", err)
+		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *Handler) GetArchivePost(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	postID := path.Base(r.URL.Path)
+	if postID == "" {
+		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		return
+	}
+	ipostID, err := strconv.Atoi(postID)
+	if err != nil {
+		slog.Error("Invalid post ID", "err", err)
+	}
+
+	post, err := h.postService.GetPostByID(ctx, ipostID)
+	if err != nil {
+		slog.Error("Failed to fetch post", "err", err)
+		http.Error(w, "Failed to fetch post", http.StatusInternalServerError)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("internal/ui/templates/archive-post.html")
+	if err != nil {
+		slog.Error("Failed to parse template", "err", err)
+		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, post)
+	if err != nil {
+		slog.Error("Failed to execute template", "err", err)
+		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *Handler) CreatePostForm(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	_, ok := GetUserFromContext(ctx)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("internal/ui/templates/create-post.html")
+	if err != nil {
+		slog.Error("Failed to parse template", "err", err)
+		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		return
+	}
+
+	data := TemplateData{
+		FormData: FormData{},
+		Error:   make(map[string]string),
+	}
+
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		slog.Error("Failed to execute template", "err", err)
+		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user, ok := GetUserFromContext(ctx)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	err := r.ParseMultipartForm(10 << 20) // 10MB max memory
+	if err != nil {
+		http.Error(w, "Unable to parse form", http.StatusBadRequest)
+		return
+	}
+
+	name := r.FormValue("name")
+	title := r.FormValue("title")
+	content := r.FormValue("content")
+
+	// Validation
+	errors := make(map[string]string)
+	if title == "" {
+		errors["title"] = "Title is required"
+	}
+	if content == "" {
+		errors["content"] = "Content is required"
+	}
+
+	// If validation fails, re-display form with errors
+	if len(errors) > 0 {
+		data := TemplateData{
+			FormData: FormData{
+				Name:    name,
+				Title:   title,
+				Content: content,
+			},
+			Error: errors,
+		}
+
+		tmpl := template.Must(template.ParseFiles("create-post.html"))
+		tmpl.Execute(w, data)
+		return
+	}
+
+	// Test
+	if name != "" {
+		h.userService.UpdateUserName(ctx, user.ID, name)
+		user.Name = name // Update user in context after changing name
+	}
+
+	// Add triple-s implemenatation for file upload
+	// Handle file upload
+    var imagePath string
+    file, fileHeader, err := r.FormFile("image")
+    if err == nil && fileHeader != nil {
+        defer file.Close()
+        
+        // Validate file type
+        if !isValidImageType(fileHeader) {
+            errors["image"] = "Invalid image format"
+            data := TemplateData{
+                FormData: FormData{Name: name, Title: title, Content: content},
+                Error:   errors,
+            }
+            tmpl := template.Must(template.ParseFiles("create-post.html"))
+            tmpl.Execute(w, data)
+            return
+        }
+        
+        // Save file
+        imagePath, err = saveUploadedFile(file, fileHeader)
+        if err != nil {
+            http.Error(w, "Failed to save image", http.StatusInternalServerError)
+            return
+        }
+    }
+
+	_, err = h.postService.CreatePost(ctx, user.ID, user.Name, title, content, imagePath)
+	if err != nil {
+		slog.Error("Failed to create post", "err", err)
+		http.Error(w, "Failed to create post", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/catalog", http.StatusSeeOther)
 }

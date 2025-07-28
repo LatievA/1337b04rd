@@ -9,7 +9,7 @@ type Post struct {
 	AvatarURL  *string
 	Title      string
 	Content    string
-	ImageURL   *string
+	ImageURL   string
 	Comments   []*Comment
 	CreatedAt  time.Time
 	ArchivedAt time.Time
@@ -18,6 +18,7 @@ type Post struct {
 
 type Comment struct {
 	ID        int
+	User      *User
 	UserID    int
 	PostID    int
 	ParentID  *int

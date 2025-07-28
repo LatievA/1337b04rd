@@ -4,6 +4,7 @@ import (
 	"1337b04rd/internal/adapters/db/repository"
 	"1337b04rd/internal/adapters/external_api"
 	"1337b04rd/internal/adapters/http/handlers"
+	"1337b04rd/internal/adapters/s3"
 	"1337b04rd/internal/config"
 	"1337b04rd/internal/logger"
 	"1337b04rd/internal/server"
@@ -29,6 +30,7 @@ func RunServer() {
 	commentRepo := repository.NewCommentRepository(db)
 	userRepo := repository.NewUserRepository(db)
 
+	// s3Client := s3.NewHTTPClient(config.S3Config.BaseURL)
 	avatarProvider := external_api.NewRickAndMortyClient()
 
 	userService := services.NewUserService(userRepo, avatarProvider)
@@ -40,3 +42,9 @@ func RunServer() {
 
 	server.Run()
 }
+
+// YOU DID UNBELIEVABLE FRONTEND 0_0 | why are you not in frontend branch
+
+// TODO:
+// - Add archivation of posts after time
+// - Add error page implementation
