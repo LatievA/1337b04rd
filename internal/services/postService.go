@@ -18,7 +18,6 @@ func NewPostService(postRepo domain.PostRepository, commentRepo domain.CommentRe
 }
 
 func (s *PostService) CreatePost(ctx context.Context, userID int, name, title, content, imageURL string) (*domain.Post, error) {
-
 	post := &domain.Post{
 		UserID:     userID,
 		Username:   name,

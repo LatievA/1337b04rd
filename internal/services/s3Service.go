@@ -1,13 +1,12 @@
 package services
 
 import (
+	"1337b04rd/internal/adapters/s3"
+	"1337b04rd/internal/domain"
 	"context"
 	"fmt"
 	"mime"
 	"path/filepath"
-
-	"1337b04rd/internal/domain"
-	"1337b04rd/internal/adapters/s3"
 )
 
 // S3ServiceImpl implements domain.S3Service using the HTTPClient

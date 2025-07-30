@@ -34,11 +34,11 @@ func RunServer() {
 	userService := services.NewUserService(userRepo, avatarProvider)
 	postService := services.NewPostService(postRepo, commentRepo, userRepo)
 	commentService := services.NewCommentService(commentRepo, postRepo)
-	s3Service := services.NewS3Service("http://host.docker.internal:8080")
+	s3Service := services.NewS3Service(config.S3Config.BaseURL)
 
 	handler := handlers.NewHandler(userService, postService, commentService, s3Service)
 	server := server.NewServer(config, handler)
-	
+
 	handler.StartArchiveWorker()
 	server.Run()
 }

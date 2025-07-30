@@ -113,7 +113,6 @@ func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-
 	tmpl, err := template.ParseFiles("internal/ui/templates/post.html")
 	if err != nil {
 		slog.Error("Failed to parse template", "err", err)

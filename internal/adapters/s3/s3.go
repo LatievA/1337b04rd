@@ -48,6 +48,8 @@ func (c *HTTPClient) CreateBucket(bucketName string) error {
 
 func (c *HTTPClient) CreateObject(bucketName, objectKey, contentType string, data []byte) (string, error) {
 	url := c.baseURL + "/" + bucketName + "/" + objectKey
+	c.CreateBucket(bucketName)
+
 	slog.Info("Creating object", "url", url, "contentType", contentType)
 
 	req, err := http.NewRequest("PUT", url, strings.NewReader(string(data)))

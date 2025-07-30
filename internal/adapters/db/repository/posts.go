@@ -1,11 +1,10 @@
 package repository
 
 import (
+	"1337b04rd/internal/domain"
 	"context"
 	"database/sql"
 	"fmt"
-
-	"1337b04rd/internal/domain"
 )
 
 type PostRepository struct {

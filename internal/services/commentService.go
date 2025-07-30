@@ -24,7 +24,7 @@ func (s *CommentService) AddComment(ctx context.Context, userID, postID, parentI
 
 	comment := &domain.Comment{
 		UserID:    userID,
-		PostID:   postID,
+		PostID:    postID,
 		ParentID:  parentID,
 		Content:   content,
 		CreatedAt: time.Now(),

@@ -11,7 +11,7 @@ import (
 type Config struct {
 	ServerConfig *ServerConfig
 	DBConfig     *DBConfig
-	S3Config	 *S3Config
+	S3Config     *S3Config
 }
 
 type ServerConfig struct {
@@ -40,7 +40,7 @@ func NewConfig() (*Config, error) {
 	}
 
 	s3Config := &S3Config{
-		BaseURL: getEnv("S3_BASE_URL", "http://localhost:8080"),
+		BaseURL: getEnv("S3_BASE_URL", "http://host.docker.internal:8080"),
 	}
 
 	serverConfig := &ServerConfig{

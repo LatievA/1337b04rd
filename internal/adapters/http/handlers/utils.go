@@ -4,8 +4,8 @@ import (
 	"1337b04rd/internal/domain"
 	"context"
 	"log/slog"
-	"time"
 	"mime/multipart"
+	"time"
 )
 
 func GetUserFromContext(ctx context.Context) (*domain.User, bool) {
@@ -19,10 +19,10 @@ func (h *Handler) StartArchiveWorker() {
 		defer ticker.Stop()
 
 		slog.Info("Archive worker started", "interval", "15s")
-		
+
 		for range ticker.C {
 			slog.Info("Archiving expired posts")
-			err:= h.postService.ArchiveOldPosts(context.Background())
+			err := h.postService.ArchiveOldPosts(context.Background())
 			if err != nil {
 				slog.Error("Failed to archive expired posts", "err", err)
 				continue
