@@ -6,7 +6,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"log/slog"
 )
 
 type UserService struct {
@@ -20,7 +19,6 @@ func NewUserService(userRepo domain.UserRepository, api domain.RickAndMortyAPI) 
 
 func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) (*domain.User, bool, error) {
 	var isNew bool
-	slog.Info(sessionToken)
 	if sessionToken == "" {
 		newSessionToken, err := s.generateSession()
 		isNew = true
@@ -31,7 +29,6 @@ func (s *UserService) GetOrCreateUser(ctx context.Context, sessionToken string) 
 	} else {
 		user, err := s.userRepo.FindBySessionToken(ctx, sessionToken)
 		if err == nil {
-			slog.Info("Returned user from db")
 			return user, isNew, nil
 		}
 		isNew = true

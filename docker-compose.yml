@@ -31,7 +31,7 @@ services:
 
   triples:
     build:
-      context: ~/triple-s
+      context: ~/alem_backend/triple-s
     ports:
       - "8080:8080"
     volumes:
@@ -62,6 +62,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-board}
       SERVER_PORT: ${SERVER_PORT:-8081}
       S3_BASE_URL: http://triples:8080
+      S3_PUBLIC_URL: http://localhost:8080
     restart: unless-stopped
 
 volumes:

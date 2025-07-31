@@ -34,7 +34,7 @@ func RunServer() {
 	userService := services.NewUserService(userRepo, avatarProvider)
 	postService := services.NewPostService(postRepo, commentRepo, userRepo)
 	commentService := services.NewCommentService(commentRepo, postRepo)
-	s3Service := services.NewS3Service(config.S3Config.BaseURL)
+	s3Service := services.NewS3Service(config.S3Config.BaseURL, config.S3Config.PublicURL)
 
 	handler := handlers.NewHandler(userService, postService, commentService, s3Service)
 	server := server.NewServer(config, handler)

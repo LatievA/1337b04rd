@@ -15,8 +15,8 @@ type S3ServiceImpl struct {
 }
 
 // NewS3Service creates a new S3ServiceImpl with given base URL and bucket name
-func NewS3Service(baseURL string) domain.S3Service {
-	httpClient := s3.NewHTTPClient(baseURL)
+func NewS3Service(baseURL, publicURL string) domain.S3Service {
+	httpClient := s3.NewHTTPClient(baseURL, publicURL)
 	return &S3ServiceImpl{client: httpClient}
 }
 

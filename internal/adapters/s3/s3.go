@@ -10,14 +10,16 @@ import (
 type HTTPClient struct {
 	client  *http.Client
 	baseURL string
+	publicURL string
 }
 
-func NewHTTPClient(baseURL string) *HTTPClient {
+func NewHTTPClient(baseURL, publicURL string) *HTTPClient {
 	return &HTTPClient{
 		client: &http.Client{
 			Timeout: 30 * time.Second,
 		},
 		baseURL: baseURL,
+		publicURL: publicURL,
 	}
 }
 
@@ -70,12 +72,12 @@ func (c *HTTPClient) CreateObject(bucketName, objectKey, contentType string, dat
 		slog.Error("Failed to create object", "statusCode", resp.StatusCode)
 		return "", err
 	}
-
+	url = c.publicURL + "/" + bucketName + "/" + objectKey
 	return url, nil
 }
 
 func (c *HTTPClient) GetObject(bucketName, objectKey string) (string, error) {
-	url := c.baseURL + "/" + bucketName + "/" + objectKey
+	url := c.publicURL + "/" + bucketName + "/" + objectKey
 	slog.Info("Getting object", "url", url)
 
 	req, err := http.NewRequest("GET", url, nil)
