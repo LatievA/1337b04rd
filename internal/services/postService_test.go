@@ -113,6 +113,20 @@ func (m *mockPostRepository) ArchiveExpired(ctx context.Context) error {
 	return nil
 }
 
+func (m *mockPostRepository) Add15Min(ctx context.Context, postID int) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	post, exists := m.posts[postID]
+	if !exists {
+		return errors.New("post not found")
+	}
+
+	// Add 15 minutes to the ArchivedAt time
+	post.ArchivedAt = post.ArchivedAt.Add(15 * time.Minute)
+	return nil
+}
+
 type mockCommentRepository struct {
 	comments        map[int]*domain.Comment
 	postComments    map[int][]*domain.Comment
