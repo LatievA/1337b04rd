@@ -14,7 +14,7 @@ func (h *Handler) CreateComment(w http.ResponseWriter, r *http.Request) {
 	// Parse form data
 	if err := r.ParseForm(); err != nil {
 		slog.Error("Failed to parse form", "error", err)
-		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		h.HandleHTTPError(w, r, "Failed to parse form", http.StatusBadRequest)
 		return
 	}
 
@@ -25,14 +25,14 @@ func (h *Handler) CreateComment(w http.ResponseWriter, r *http.Request) {
 
 	// Validate required fields
 	if content == "" {
-		http.Error(w, "Comment content is required", http.StatusBadRequest)
+		h.HandleHTTPError(w, r, "Comment content is required", http.StatusBadRequest)
 		return
 	}
 
 	// Get user info
 	user, ok := GetUserFromContext(r.Context())
 	if !ok {
-		http.Error(w, "Session required", http.StatusUnauthorized)
+		h.HandleHTTPError(w, r, "Session required", http.StatusUnauthorized)
 		return
 	}
 
@@ -56,9 +56,12 @@ func (h *Handler) CreateComment(w http.ResponseWriter, r *http.Request) {
 	_, err = h.commentService.AddComment(r.Context(), user.ID, ipostID, parentID, content)
 	if err != nil {
 		slog.Error("Failed to save comment", "error", err)
-		http.Error(w, "Failed to save comment", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Failed to save comment", http.StatusInternalServerError)
 		return
 	}
+
+	// Add 15 minutes to post lifetime
+	err = h.postService.AddTimeToPostLifetime(r.Context(), ipostID)
 
 	// Redirect back to the post page
 	http.Redirect(w, r, fmt.Sprintf("/post/%s", postID), http.StatusSeeOther)

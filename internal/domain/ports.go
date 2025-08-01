@@ -8,6 +8,7 @@ type PostService interface {
 	CreatePost(ctx context.Context, userID int, username, title, content, imageURL string) (*Post, error)
 	GetPostByID(ctx context.Context, postID int) (*Post, error)
 	ListPosts(ctx context.Context, archived bool) ([]*Post, error)
+	AddTimeToPostLifetime(ctx context.Context, postID int) error
 	ArchiveOldPosts(ctx context.Context) error
 }
 
@@ -29,6 +30,7 @@ type PostRepository interface {
 	FindAll(ctx context.Context, archived bool) ([]*Post, error)
 	Update(ctx context.Context, post *Post) error
 	ArchiveExpired(ctx context.Context) error
+	Add15Min(ctx context.Context, postID int) error
 }
 
 type CommentRepository interface {
