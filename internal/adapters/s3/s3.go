@@ -8,8 +8,8 @@ import (
 )
 
 type HTTPClient struct {
-	client  *http.Client
-	baseURL string
+	client    *http.Client
+	baseURL   string
 	publicURL string
 }
 
@@ -18,7 +18,7 @@ func NewHTTPClient(baseURL, publicURL string) *HTTPClient {
 		client: &http.Client{
 			Timeout: 30 * time.Second,
 		},
-		baseURL: baseURL,
+		baseURL:   baseURL,
 		publicURL: publicURL,
 	}
 }

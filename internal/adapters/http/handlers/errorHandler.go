@@ -7,7 +7,7 @@ import (
 )
 
 // Replace this function in your handlers
-func (h *Handler)HandleHTTPError(w http.ResponseWriter, r *http.Request, message string, statusCode int) {
+func (h *Handler) HandleHTTPError(w http.ResponseWriter, r *http.Request, message string, statusCode int) {
 	slog.Error("HTTP Error", "status", statusCode, "message", message, "path", r.URL.Path)
 	ServeErrorPage(w, r, statusCode, message)
 }

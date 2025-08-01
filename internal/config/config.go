@@ -41,9 +41,8 @@ func NewConfig() (*Config, error) {
 	}
 
 	s3Config := &S3Config{
-		BaseURL: getEnv("S3_BASE_URL", "http://triples:8080"),
-		PublicURL: getEnv("S3_PUBLIC_URL","http://localhost:8080"),
-		
+		BaseURL:   getEnv("S3_BASE_URL", "http://triples:8080"),
+		PublicURL: getEnv("S3_PUBLIC_URL", "http://localhost:8080"),
 	}
 
 	serverConfig := &ServerConfig{

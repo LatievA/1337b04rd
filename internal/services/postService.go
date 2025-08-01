@@ -44,7 +44,7 @@ func (s *PostService) ListPosts(ctx context.Context, archived bool) ([]*domain.P
 }
 
 func (s *PostService) AddTimeToPostLifetime(ctx context.Context, postID int) error {
-	return s.postRepo.Add15Min(ctx,postID)
+	return s.postRepo.Add15Min(ctx, postID)
 }
 
 func (s *PostService) ArchiveOldPosts(ctx context.Context) error {
