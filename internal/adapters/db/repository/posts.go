@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 )
 
 type PostRepository struct {
@@ -140,6 +141,16 @@ func (r *PostRepository) ArchiveExpired(ctx context.Context) error {
 	_, err := r.db.ExecContext(ctx, query)
 	if err != nil {
 		return fmt.Errorf("failed to archive expired posts: %w", err)
+	}
+	return nil
+}
+
+func (r *PostRepository) Add15Min(ctx context.Context, id int) error {
+	time := time.Now().Add(15 * time.Minute)
+	query := `UPDATE posts SET archived_at = $2 WHERE id = $1`
+	_, err := r.db.ExecContext(ctx, query, id, time)
+	if err != nil {
+		return fmt.Errorf("failed to add 15 minutes to post lifetime: %w", err)
 	}
 	return nil
 }

@@ -60,6 +60,9 @@ func (h *Handler) CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Add 15 minutes to post lifetime
+	err = h.postService.AddTimeToPostLifetime(r.Context(), ipostID)
+
 	// Redirect back to the post page
 	http.Redirect(w, r, fmt.Sprintf("/post/%s", postID), http.StatusSeeOther)
 } // Works correctly
