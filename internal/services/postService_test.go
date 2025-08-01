@@ -18,6 +18,7 @@ type mockPostRepository struct {
 	findAllErr  error
 	updateErr   error
 	archiveErr  error
+	add15MinErr error
 }
 
 func newMockPostRepo() *mockPostRepository {
@@ -565,5 +566,232 @@ func TestPostService_ArchiveOldPosts(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestPostService_AddTimeToPostLifetime(t *testing.T) {
+	tests := []struct {
+		name        string
+		postID      int
+		prepopulate bool
+		add15MinErr error
+		expectedErr bool
+	}{
+		{
+			name:        "successful time extension",
+			postID:      1,
+			prepopulate: true,
+			expectedErr: false,
+		},
+		{
+			name:        "post not found",
+			postID:      2,
+			prepopulate: false,
+			expectedErr: true,
+		},
+		{
+			name:        "repository error",
+			postID:      1,
+			prepopulate: true,
+			add15MinErr: errors.New("db error"),
+			expectedErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := newMockPostRepo()
+			repo.add15MinErr = tt.add15MinErr
+
+			var originalTime time.Time
+			if tt.prepopulate {
+				post := &domain.Post{
+					ID:         tt.postID,
+					ArchivedAt: time.Now().Add(10 * time.Minute),
+				}
+				repo.Save(context.Background(), post)
+				originalTime = post.ArchivedAt
+			}
+
+			service := NewPostService(repo, &mockCommentRepository{}, &mockUserRepository{})
+			err := service.AddTimeToPostLifetime(context.Background(), tt.postID)
+
+			if tt.expectedErr {
+				if err == nil {
+					t.Error("expected error but got nil")
+				}
+				return
+			}
+
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+				return
+			}
+
+			updatedPost, _ := repo.FindByID(context.Background(), tt.postID)
+			if !updatedPost.ArchivedAt.Equal(originalTime.Add(15 * time.Minute)) {
+				t.Errorf("expected archive time to be increased by 15 minutes")
+			}
+		})
+	}
+}
+
+func TestCommentService_AddComment(t *testing.T) {
+	tests := []struct {
+		name        string
+		userID      int
+		postID      int
+		parentID    int
+		content     string
+		postExists  bool
+		saveErr     error
+		expectedErr bool
+	}{
+		{
+			name:        "successful comment",
+			userID:      1,
+			postID:      1,
+			content:     "Test comment",
+			postExists:  true,
+			expectedErr: false,
+		},
+		{
+			name:        "post not found",
+			postID:      2,
+			postExists:  false,
+			expectedErr: true,
+		},
+		{
+			name:        "repository error",
+			postID:      1,
+			postExists:  true,
+			saveErr:     errors.New("save error"),
+			expectedErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			postRepo := newMockPostRepo()
+			commentRepo := newMockCommentRepo()
+			commentRepo.saveErr = tt.saveErr
+
+			if tt.postExists {
+				postRepo.Save(context.Background(), &domain.Post{ID: tt.postID})
+			}
+
+			service := NewCommentService(commentRepo, postRepo)
+			comment, err := service.AddComment(context.Background(), tt.userID, tt.postID, tt.parentID, tt.content)
+
+			if tt.expectedErr {
+				if err == nil {
+					t.Error("expected error, got nil")
+				}
+				return
+			}
+
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+				return
+			}
+
+			if comment.ID == 0 {
+				t.Error("expected comment ID to be set")
+			}
+			if comment.PostID != tt.postID {
+				t.Errorf("expected PostID %d, got %d", tt.postID, comment.PostID)
+			}
+			if comment.Content != tt.content {
+				t.Errorf("expected content %s, got %s", tt.content, comment.Content)
+			}
+		})
+	}
+}
+
+func TestCommentService_GetCommentsByPostID(t *testing.T) {
+	tests := []struct {
+		name            string
+		postID          int
+		prepopulate     bool
+		findByPostIDErr error
+		expectedLen     int
+		expectedErr     bool
+	}{
+		{
+			name:        "comments found",
+			postID:      1,
+			prepopulate: true,
+			expectedLen: 2,
+		},
+		{
+			name:        "no comments",
+			postID:      2,
+			prepopulate: false,
+			expectedLen: 0,
+		},
+		{
+			name:            "repository error",
+			postID:          1,
+			prepopulate:     true,
+			findByPostIDErr: errors.New("find error"),
+			expectedErr:     true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			commentRepo := newMockCommentRepo()
+			commentRepo.findByPostIDErr = tt.findByPostIDErr
+
+			if tt.prepopulate {
+				commentRepo.Save(context.Background(), &domain.Comment{PostID: tt.postID})
+				commentRepo.Save(context.Background(), &domain.Comment{PostID: tt.postID})
+			}
+
+			service := NewCommentService(commentRepo, newMockPostRepo())
+			comments, err := service.GetCommentsByPostID(context.Background(), tt.postID)
+
+			if tt.expectedErr {
+				if err == nil {
+					t.Error("expected error, got nil")
+				}
+				return
+			}
+
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+				return
+			}
+
+			if len(comments) != tt.expectedLen {
+				t.Errorf("expected %d comments, got %d", tt.expectedLen, len(comments))
+			}
+		})
+	}
+}
+
+func TestPostRepository_ConcurrentAccess(t *testing.T) {
+	repo := newMockPostRepo()
+	post := &domain.Post{Title: "Test"}
+	id, _ := repo.Save(context.Background(), post)
+
+	var wg sync.WaitGroup
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, _ = repo.FindByID(context.Background(), id)
+			_ = repo.Update(context.Background(), post)
+		}()
+	}
+	wg.Wait()
+
+	// Verify no data corruption occurred
+	updatedPost, err := repo.FindByID(context.Background(), id)
+	if err != nil {
+		t.Fatalf("failed to find post: %v", err)
+	}
+	if updatedPost.Title != "Test" {
+		t.Errorf("expected title 'Test', got '%s'", updatedPost.Title)
 	}
 }
