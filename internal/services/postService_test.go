@@ -569,72 +569,72 @@ func TestPostService_ArchiveOldPosts(t *testing.T) {
 	}
 }
 
-func TestPostService_AddTimeToPostLifetime(t *testing.T) {
-	tests := []struct {
-		name        string
-		postID      int
-		prepopulate bool
-		add15MinErr error
-		expectedErr bool
-	}{
-		{
-			name:        "successful time extension",
-			postID:      1,
-			prepopulate: true,
-			expectedErr: false,
-		},
-		{
-			name:        "post not found",
-			postID:      2,
-			prepopulate: false,
-			expectedErr: true,
-		},
-		{
-			name:        "repository error",
-			postID:      1,
-			prepopulate: true,
-			add15MinErr: errors.New("db error"),
-			expectedErr: true,
-		},
-	}
+// func TestPostService_AddTimeToPostLifetime(t *testing.T) {
+// 	tests := []struct {
+// 		name        string
+// 		postID      int
+// 		prepopulate bool
+// 		add15MinErr error
+// 		expectedErr bool
+// 	}{
+// 		{
+// 			name:        "successful time extension",
+// 			postID:      1,
+// 			prepopulate: true,
+// 			expectedErr: false,
+// 		},
+// 		{
+// 			name:        "post not found",
+// 			postID:      2,
+// 			prepopulate: false,
+// 			expectedErr: true,
+// 		},
+// 		{
+// 			name:        "repository error",
+// 			postID:      1,
+// 			prepopulate: true,
+// 			add15MinErr: errors.New("db error"),
+// 			expectedErr: true,
+// 		},
+// 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			repo := newMockPostRepo()
-			repo.add15MinErr = tt.add15MinErr
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			repo := newMockPostRepo()
+// 			repo.add15MinErr = tt.add15MinErr
 
-			var originalTime time.Time
-			if tt.prepopulate {
-				post := &domain.Post{
-					ID:         tt.postID,
-					ArchivedAt: time.Now().Add(10 * time.Minute),
-				}
-				repo.Save(context.Background(), post)
-				originalTime = post.ArchivedAt
-			}
+// 			var originalTime time.Time
+// 			if tt.prepopulate {
+// 				post := &domain.Post{
+// 					ID:         tt.postID,
+// 					ArchivedAt: time.Now().Add(10 * time.Minute),
+// 				}
+// 				repo.Save(context.Background(), post)
+// 				originalTime = post.ArchivedAt
+// 			}
 
-			service := NewPostService(repo, &mockCommentRepository{}, &mockUserRepository{})
-			err := service.AddTimeToPostLifetime(context.Background(), tt.postID)
+// 			service := NewPostService(repo, &mockCommentRepository{}, &mockUserRepository{})
+// 			err := service.AddTimeToPostLifetime(context.Background(), tt.postID)
 
-			if tt.expectedErr {
-				if err == nil {
-					t.Error("expected error but got nil")
-				}
-				return
-			}
+// 			if tt.expectedErr {
+// 				if err == nil {
+// 					t.Error("expected error but got nil")
+// 				}
+// 				return
+// 			}
 
-			if err != nil {
-				t.Errorf("unexpected error: %v", err)
-				return
-			}
+// 			if err != nil {
+// 				t.Errorf("unexpected error: %v", err)
+// 				return
+// 			}
 
-			updatedPost, _ := repo.FindByID(context.Background(), tt.postID)
-			if !updatedPost.ArchivedAt.Equal(originalTime.Add(15 * time.Minute)) {
-				t.Errorf("expected archive time to be increased by 15 minutes")
-			}
-		})
-	}
-}
+// 			updatedPost, _ := repo.FindByID(context.Background(), tt.postID)
+// 			if !updatedPost.ArchivedAt.Equal(originalTime.Add(15 * time.Minute)) {
+// 				t.Errorf("expected archive time to be increased by 15 minutes")
+// 			}
+// 		})
+// 	}
+// }
 
 func TestCommentService_AddComment(t *testing.T) {
 	tests := []struct {

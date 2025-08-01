@@ -44,5 +44,4 @@ func RunServer() {
 }
 
 // TODO:
-// - Add error page implementation
-// - Change username as author name when changing it in comment
+// unit tests

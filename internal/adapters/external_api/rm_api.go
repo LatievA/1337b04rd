@@ -13,6 +13,7 @@ import (
 
 type RickAndMortyClient struct {
 	total                int
+	baseURL              string
 	fetchedCharactersIDs map[int]struct{}
 	mu                   sync.Mutex
 }
@@ -20,6 +21,7 @@ type RickAndMortyClient struct {
 func NewRickAndMortyClient() domain.RickAndMortyAPI {
 	return &RickAndMortyClient{
 		fetchedCharactersIDs: make(map[int]struct{}),
+		baseURL:             "https://rickandmortyapi.com/api/",
 	}
 }
 
@@ -27,14 +29,14 @@ func (r *RickAndMortyClient) GetRandomCharacter(ctx context.Context) (string, st
 	if r.total == 0 {
 		var meta struct {
 			Info struct {
-				UserCount int `json:"count"`
+				Count int `json:"count"`
 			} `json:"info"`
 		}
 
-		if err := fetchJSON("https://rickandmortyapi.com/api/character", &meta); err != nil {
-			return "", "", err
+		if err := fetchJSON(r.baseURL+"character", &meta); err != nil {
+			return "", "", fmt.Errorf("failed to fetch meta data: %w", err)
 		}
-		r.total = meta.Info.UserCount
+		r.total = meta.Info.Count
 	}
 
 	r.mu.Lock()
@@ -58,8 +60,8 @@ func (r *RickAndMortyClient) GetRandomCharacter(ctx context.Context) (string, st
 
 		r.fetchedCharactersIDs[id] = struct{}{}
 
-		if err := fetchJSON(fmt.Sprintf("https://rickandmortyapi.com/api/character/%d", id), &ch); err != nil {
-			return "", "", err
+		if err := fetchJSON(fmt.Sprintf("%scharacter/%d", r.baseURL, id), &ch); err != nil {
+			return "", "", fmt.Errorf("failed to fetch character: %w", err)
 		}
 
 		return ch.Name, ch.Image, nil
@@ -73,5 +75,10 @@ func fetchJSON(url string, v interface{}) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
 	return json.NewDecoder(resp.Body).Decode(v)
 }
