@@ -29,15 +29,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /create-post", h.AuthMiddleware(http.HandlerFunc(h.CreatePostForm)))
 	mux.Handle("POST /create-post", h.AuthMiddleware(http.HandlerFunc(h.CreatePost)))
 	mux.Handle("POST /post/{id}/comment", h.AuthMiddleware(http.HandlerFunc(h.CreateComment)))
+	mux.Handle("GET /error", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h.HandleHTTPError(w, r, "An expected error occurred.", http.StatusInternalServerError)
+	}))
 }
-
-/*
-user, ok := GetUserFromContext(r.Context())
-    if !ok {
-        http.Error(w, "Unauthorized", http.StatusUnauthorized)
-        return
-    }
-
-    // Use user in your logic
-    slog.Info("User accessing posts", "userID", user.ID)
-*/

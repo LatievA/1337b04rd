@@ -28,21 +28,21 @@ func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
 	posts, err := h.postService.ListPosts(ctx, false)
 	if err != nil {
 		slog.Error("Failed to fetch posts", "err", err)
-		http.Error(w, "Failed to fetch posts", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Failed to fetch posts", http.StatusInternalServerError)
 		return
 	}
 
 	tmpl, err := template.ParseFiles("internal/ui/templates/catalog.html")
 	if err != nil {
 		slog.Error("Failed to parse template", "err", err)
-		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Could not load page", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.Execute(w, posts)
 	if err != nil {
 		slog.Error("Failed to execute template", "err", err)
-		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Could not load page", http.StatusInternalServerError)
 		return
 	}
 } // Works correctly
@@ -52,21 +52,21 @@ func (h *Handler) ListArchivedPosts(w http.ResponseWriter, r *http.Request) {
 	posts, err := h.postService.ListPosts(ctx, true)
 	if err != nil {
 		slog.Error("Failed to fetch posts", "err", err)
-		http.Error(w, "Failed to fetch posts", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Failed to fetch posts", http.StatusInternalServerError)
 		return
 	}
 
 	tmpl, err := template.ParseFiles("internal/ui/templates/archive.html")
 	if err != nil {
 		slog.Error("Failed to parse template", "err", err)
-		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Could not load page", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.Execute(w, posts)
 	if err != nil {
 		slog.Error("Failed to execute template", "err", err)
-		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Could not load page", http.StatusInternalServerError)
 		return
 	}
 } // Works correctly
@@ -75,7 +75,7 @@ func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	postID := path.Base(r.URL.Path)
 	if postID == "" {
-		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		h.HandleHTTPError(w, r, "Post ID is required", http.StatusBadRequest)
 		return
 	}
 	ipostID, err := strconv.Atoi(postID)
@@ -86,13 +86,13 @@ func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 	post, err := h.postService.GetPostByID(ctx, ipostID)
 	if err != nil {
 		slog.Error("Failed to fetch post", "err", err)
-		http.Error(w, "Failed to fetch post", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Failed to fetch post", http.StatusInternalServerError)
 		return
 	}
 	post.User, err = h.userService.GetUserByID(ctx, post.UserID)
 	if err != nil {
 		slog.Error("Failed to fetch post user", "err", err)
-		http.Error(w, "Failed to fetch post user", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Failed to fetch post user", http.StatusInternalServerError)
 		return
 	}
 
@@ -100,7 +100,7 @@ func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 		comment.User, _ = h.userService.GetUserByID(ctx, comment.UserID)
 		if comment.User == nil {
 			slog.Error("Failed to fetch comment user", "commentID", comment.ID)
-			http.Error(w, "Failed to fetch comment user", http.StatusInternalServerError)
+			h.HandleHTTPError(w, r, "Failed to fetch comment user", http.StatusInternalServerError)
 			return
 		}
 		if comment.ParentID > 0 {
@@ -116,14 +116,14 @@ func (h *Handler) GetPost(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("internal/ui/templates/post.html")
 	if err != nil {
 		slog.Error("Failed to parse template", "err", err)
-		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Could not load page", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.Execute(w, post)
 	if err != nil {
 		slog.Error("Failed to execute template", "err", err)
-		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Could not load page", http.StatusInternalServerError)
 		return
 	}
 } // Works correctly
@@ -132,7 +132,7 @@ func (h *Handler) GetArchivePost(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	postID := path.Base(r.URL.Path)
 	if postID == "" {
-		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		h.HandleHTTPError(w, r, "Post ID is required", http.StatusBadRequest)
 		return
 	}
 	ipostID, err := strconv.Atoi(postID)
@@ -143,13 +143,13 @@ func (h *Handler) GetArchivePost(w http.ResponseWriter, r *http.Request) {
 	post, err := h.postService.GetPostByID(ctx, ipostID)
 	if err != nil {
 		slog.Error("Failed to fetch post", "err", err)
-		http.Error(w, "Failed to fetch post", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Failed to fetch post", http.StatusInternalServerError)
 		return
 	}
 	post.User, err = h.userService.GetUserByID(ctx, post.UserID)
 	if err != nil {
 		slog.Error("Failed to fetch post user", "err", err)
-		http.Error(w, "Failed to fetch post user", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Failed to fetch post user", http.StatusInternalServerError)
 		return
 	}
 
@@ -157,7 +157,7 @@ func (h *Handler) GetArchivePost(w http.ResponseWriter, r *http.Request) {
 		comment.User, _ = h.userService.GetUserByID(ctx, comment.UserID)
 		if comment.User == nil {
 			slog.Error("Failed to fetch comment user", "commentID", comment.ID)
-			http.Error(w, "Failed to fetch comment user", http.StatusInternalServerError)
+			h.HandleHTTPError(w, r, "Failed to fetch comment user", http.StatusInternalServerError)
 			return
 		}
 		if comment.ParentID > 0 {
@@ -173,14 +173,14 @@ func (h *Handler) GetArchivePost(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("internal/ui/templates/archive-post.html")
 	if err != nil {
 		slog.Error("Failed to parse template", "err", err)
-		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Could not load page", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.Execute(w, post)
 	if err != nil {
 		slog.Error("Failed to execute template", "err", err)
-		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Could not load page", http.StatusInternalServerError)
 		return
 	}
 }
@@ -189,14 +189,14 @@ func (h *Handler) CreatePostForm(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	_, ok := GetUserFromContext(ctx)
 	if !ok {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		h.HandleHTTPError(w, r, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	tmpl, err := template.ParseFiles("internal/ui/templates/create-post.html")
 	if err != nil {
 		slog.Error("Failed to parse template", "err", err)
-		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Could not load page", http.StatusInternalServerError)
 		return
 	}
 
@@ -208,7 +208,7 @@ func (h *Handler) CreatePostForm(w http.ResponseWriter, r *http.Request) {
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		slog.Error("Failed to execute template", "err", err)
-		http.Error(w, "Could not load page", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Could not load page", http.StatusInternalServerError)
 		return
 	}
 } // Works correctly
@@ -217,13 +217,13 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user, ok := GetUserFromContext(ctx)
 	if !ok {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		h.HandleHTTPError(w, r, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	err := r.ParseMultipartForm(10 << 20) // 10MB max memory
 	if err != nil {
-		http.Error(w, "Unable to parse form", http.StatusBadRequest)
+		h.HandleHTTPError(w, r, "Unable to parse form", http.StatusBadRequest)
 		return
 	}
 
@@ -271,7 +271,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		raw, err := io.ReadAll(file)
 		if err != nil {
 			slog.Error("Failed to read image", "err", err)
-			http.Error(w, "Failed to read image", http.StatusInternalServerError)
+			h.HandleHTTPError(w, r, "Failed to read image", http.StatusInternalServerError)
 			return
 		}
 
@@ -280,7 +280,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		url, err := h.s3Service.UploadImage(ctx, raw, "posts", key)
 		if err != nil {
 			slog.Error("Failed to upload image to S3", "err", err)
-			http.Error(w, "Failed to upload to S3", http.StatusInternalServerError)
+			h.HandleHTTPError(w, r, "Failed to upload to S3", http.StatusInternalServerError)
 			return
 		}
 		imageURL = url
@@ -288,7 +288,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	_, err = h.postService.CreatePost(ctx, user.ID, user.Name, title, content, imageURL)
 	if err != nil {
 		slog.Error("Failed to create post", "err", err)
-		http.Error(w, "Failed to create post", http.StatusInternalServerError)
+		h.HandleHTTPError(w, r, "Failed to create post", http.StatusInternalServerError)
 		return
 	}
 

@@ -25,7 +25,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 		user, isNew, err := h.userService.GetOrCreateUser(ctx, sessionToken)
 		if err != nil {
 			slog.Error("Failed to get user by session", "err", err)
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			h.HandleHTTPError(w, r, "Internal server error", http.StatusInternalServerError)
 			return
 		}
 
