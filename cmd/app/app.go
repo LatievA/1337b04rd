@@ -43,8 +43,6 @@ func RunServer() {
 	server.Run()
 }
 
-// YOU DID UNBELIEVABLE FRONTEND 0_0 | why are you not in frontend branch
-
 // TODO:
 // - Add error page implementation
-// - Add triple-s as a docker container
+// - Change username as author name when changing it in comment

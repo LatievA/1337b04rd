@@ -39,6 +39,9 @@ func (r *RickAndMortyClient) GetRandomCharacter(ctx context.Context) (string, st
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if len(r.fetchedCharactersIDs) == r.total {
+		r.fetchedCharactersIDs = make(map[int]struct{})
+	}
 
 	var ch struct {
 		Name  string `json:"name"`
