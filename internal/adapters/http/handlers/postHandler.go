@@ -38,6 +38,14 @@ func (h *Handler) ListPosts(w http.ResponseWriter, r *http.Request) {
 		h.HandleHTTPError(w, r, "Could not load page", http.StatusInternalServerError)
 		return
 	}
+	for _, post := range posts {
+		post.User, err = h.userService.GetUserByID(ctx, post.UserID)
+		if err != nil {
+			slog.Error("Failed to fetch post user", "err", err)
+			h.HandleHTTPError(w, r, "Failed to fetch post user", http.StatusInternalServerError)
+			return
+		}
+	}
 
 	err = tmpl.Execute(w, posts)
 	if err != nil {
@@ -63,6 +71,14 @@ func (h *Handler) ListArchivedPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, post := range posts {
+		post.User, err = h.userService.GetUserByID(ctx, post.UserID)
+		if err != nil {
+			slog.Error("Failed to fetch post user", "err", err)
+			h.HandleHTTPError(w, r, "Failed to fetch post user", http.StatusInternalServerError)
+			return
+		}
+	}
 	err = tmpl.Execute(w, posts)
 	if err != nil {
 		slog.Error("Failed to execute template", "err", err)
