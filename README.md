@@ -11,10 +11,6 @@ A Go-powered web application that allows users to create threads, post comments,
 git clone https://github.com/LatievA/1337b04rd.git
 cd 1337b04rd
 
-# Configure environment variables
-cp .env.example .env
-# (Fill in the required values)
-
 # Run migrations (create tables in PostgreSQL)
 go run ./cmd/migrate
 
