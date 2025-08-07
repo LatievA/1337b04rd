@@ -11,11 +11,12 @@ A Go-powered web application that allows users to create threads, post comments,
 git clone https://github.com/LatievA/1337b04rd.git
 cd 1337b04rd
 
-# Run migrations (create tables in PostgreSQL)
-go run ./cmd/migrate
-
 # Run docker then use next command
 docker-compose up --build
+
+# Wait till all containers are up
+# Run migrations (create tables in PostgreSQL)
+go run ./cmd/migrations/migrate.go
 ```
 **After app container is up go to the localhost:8081/catalog**
 
